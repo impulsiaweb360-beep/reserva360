@@ -3,9 +3,10 @@
 import { useMemo } from 'react';
 import { useApp } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, TrendingUp, Calendar as CalIcon, Users, ArrowUpRight, Eye, Power, PowerOff, CreditCard } from 'lucide-react';
+import { Building2, TrendingUp, Calendar as CalIcon, Users, ArrowUpRight, Eye, Power, PowerOff, CreditCard, Link2, Copy, ExternalLink, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import dayjs from 'dayjs';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart } from 'recharts';
 
@@ -119,11 +120,21 @@ export function SuperAdminDashboard() {
 }
 
 export function TenantDashboard({ tenantId }) {
-  const { appointments, clients, employees, services, byTenant } = useApp();
+  const { appointments, clients, employees, services, byTenant, tenants } = useApp();
+  const tenant = tenants.find((t) => t.id === tenantId);
   const myAppts = byTenant('appointments', tenantId);
   const myClients = byTenant('clients', tenantId);
   const myEmployees = byTenant('employees', tenantId);
   const myServices = byTenant('services', tenantId);
+
+  const publicUrl = typeof window !== 'undefined' ? `${window.location.origin}/book/${tenant?.slug}` : `/book/${tenant?.slug}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(publicUrl)}`;
+
+  const copyLink = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(publicUrl);
+    }
+  };
 
   const today = dayjs().startOf('day');
   const weekEnd = today.add(7, 'day');
@@ -168,6 +179,26 @@ export function TenantDashboard({ tenantId }) {
 
   return (
     <div className="space-y-6">
+      <Card className="overflow-hidden border-indigo-200 bg-gradient-to-r from-indigo-50 via-white to-violet-50">
+        <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
+            <img src={qrUrl} alt="QR" className="h-24 w-24 shrink-0 rounded-lg border bg-white p-1" />
+            <div>
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-indigo-600" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Tu página de reservas online</span>
+              </div>
+              <div className="mt-1 font-mono text-sm font-semibold text-slate-800 break-all">{publicUrl}</div>
+              <p className="mt-1 text-xs text-slate-500">Compártela con tus clientes — pueden reservar 24/7 respetando tus horarios. <b>Nunca se crean solapamientos</b>.</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => { copyLink(); toast.success('Link copiado'); }} className="gap-1"><Copy className="h-4 w-4" /> Copiar</Button>
+            <Button size="sm" onClick={() => window.open(publicUrl, '_blank')} className="gap-1"><ExternalLink className="h-4 w-4" /> Abrir</Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Stat icon={CalIcon} label="Citas hoy" value={todayCount} color="indigo" />
         <Stat icon={CalIcon} label="Esta semana" value={weekCount} color="sky" />

@@ -10,15 +10,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { isWithinBusinessHours, hasOverlap } from '@/lib/booking';
+import { AlertTriangle } from 'lucide-react';
 
 export default function AppointmentDialog({ open, onOpenChange, tenantId, init, lockEmployeeId }) {
-  const { byTenant, appointmentsApi, clientsApi, appointments } = useApp();
-  const employees = byTenant('employees', tenantId);
+  const { byTenant, appointmentsApi, clientsApi, appointments, tenants, employees } = useApp();
+  const tenant = tenants.find((t) => t.id === tenantId);
+  const tenantEmployees = byTenant('employees', tenantId);
   const services = byTenant('services', tenantId);
   const clients = byTenant('clients', tenantId);
 
   const [form, setForm] = useState({
-    employeeId: lockEmployeeId || employees[0]?.id || '',
+    employeeId: lockEmployeeId || tenantEmployees[0]?.id || '',
     clientId: clients[0]?.id || 'new',
     serviceId: services[0]?.id || '',
     start: dayjs().add(1, 'hour').format('YYYY-MM-DDTHH:mm'),
@@ -32,7 +35,7 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
     if (open) {
       setForm((f) => ({
         ...f,
-        employeeId: lockEmployeeId || init?.employeeId || employees[0]?.id || '',
+        employeeId: lockEmployeeId || init?.employeeId || tenantEmployees[0]?.id || '',
         clientId: clients[0]?.id || 'new',
         serviceId: services[0]?.id || '',
         start: init?.start ? dayjs(init.start).format('YYYY-MM-DDTHH:mm') : dayjs().add(1, 'hour').format('YYYY-MM-DDTHH:mm'),
@@ -41,10 +44,11 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
     }
   }, [open, init, lockEmployeeId]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (force = false) => {
     const service = services.find((s) => s.id === form.serviceId);
     if (!service) { toast.error('Selecciona un servicio'); return; }
     if (!form.employeeId) { toast.error('Selecciona un empleado'); return; }
+    const employee = employees.find((e) => e.id === form.employeeId);
 
     let clientId = form.clientId;
     if (clientId === 'new') {
@@ -57,15 +61,19 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
     const start = dayjs(form.start);
     const end = start.add(service.duration, 'minute');
 
-    // Overlap check
-    const overlap = appointments.some((a) =>
-      a.tenantId === tenantId &&
-      a.employeeId === form.employeeId &&
-      a.status !== 'cancelled' &&
-      dayjs(a.start).isBefore(end) && dayjs(a.end).isAfter(start)
-    );
-    if (overlap) {
-      toast.error('El empleado ya tiene una cita que se solapa en ese horario');
+    // Business hours check (siempre obligatorio, también para admin/empleado)
+    const within = isWithinBusinessHours({ start: start.toDate(), end: end.toDate(), tenant, employee });
+    if (!within.ok) {
+      toast.error(within.reason);
+      return;
+    }
+
+    // Overlap check (admin/empleado pueden forzar con confirmación)
+    const overlap = hasOverlap({ start: start.toDate(), end: end.toDate(), employeeId: form.employeeId, tenantId, appointments });
+    if (overlap && !force) {
+      if (window.confirm('⚠️ Este empleado ya tiene una cita que se solapa en ese horario.\n\n¿Quieres crearla igualmente (override de admin/empleado)?')) {
+        return handleSubmit(true);
+      }
       return;
     }
 
@@ -80,7 +88,7 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
       notes: form.notes,
       payment: { status: form.paymentMethod === 'stripe' ? 'paid' : 'pending', amount: service.price, method: form.paymentMethod },
     });
-    toast.success('Reserva creada correctamente');
+    toast.success(overlap ? 'Reserva creada (con solapamiento)' : 'Reserva creada correctamente');
     onOpenChange(false);
   };
 
@@ -95,7 +103,7 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
               <Select value={form.employeeId} onValueChange={(v) => setForm({ ...form, employeeId: v })} disabled={!!lockEmployeeId}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.firstName} {e.lastName}</SelectItem>)}
+                  {tenantEmployees.map((e) => <SelectItem key={e.id} value={e.id}>{e.firstName} {e.lastName}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -163,10 +171,15 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
             <Label className="text-xs">Notas</Label>
             <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
+
+          <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>Las reservas internas respetan el horario del negocio. <b>Admin y empleados</b> pueden forzar solapamientos si es necesario (los clientes online nunca pueden).</span>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit}>Crear reserva</Button>
+          <Button onClick={() => handleSubmit(false)}>Crear reserva</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
