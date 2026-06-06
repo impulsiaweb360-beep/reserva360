@@ -109,11 +109,52 @@ export default function Shell({ active, setActive, children }) {
           </div>
         )}
 
-        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight text-slate-800">
+        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6">
+          <div className="flex items-center gap-2">
+            {/* Desktop: solo título */}
+            <h1 className="hidden text-lg font-semibold tracking-tight text-slate-800 md:block">
               {items.find((i) => i.id === active)?.label || 'Bookly'}
             </h1>
+            {/* Mobile: dropdown completo de navegación */}
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 font-semibold">
+                    {(() => {
+                      const cur = items.find((i) => i.id === active);
+                      const Icon = cur?.icon;
+                      return (
+                        <>
+                          {Icon && <Icon className="h-4 w-4" />}
+                          {cur?.label || 'Bookly'}
+                          <ChevronDown className="h-4 w-4 text-slate-400" />
+                        </>
+                      );
+                    })()}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-60">
+                  <DropdownMenuLabel className="text-xs">
+                    {tenant ? `${tenant.logo} ${tenant.name}` : roleLabel}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {items.map((it) => {
+                    const Icon = it.icon;
+                    const isActive = active === it.id;
+                    return (
+                      <DropdownMenuItem key={it.id} onClick={() => setActive(it.id)}
+                        className={isActive ? 'bg-slate-100 font-semibold' : ''}>
+                        <Icon className="mr-2 h-4 w-4" /> {it.label}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={resetDemo} className="text-slate-500">
+                    <RefreshCw className="mr-2 h-4 w-4" /> Resetear datos demo
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" className="relative">
@@ -146,7 +187,7 @@ export default function Shell({ active, setActive, children }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
   );
