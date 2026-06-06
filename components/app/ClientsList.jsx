@@ -41,14 +41,14 @@ export default function ClientsList({ tenantId }) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="text-base">Clientes ({filtered.length})</CardTitle>
         <div className="flex items-center gap-2">
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-            <Input placeholder="Buscar..." value={q} onChange={(e) => setQ(e.target.value)} className="w-56 pl-8" />
+            <Input placeholder="Buscar..." value={q} onChange={(e) => setQ(e.target.value)} className="w-full pl-8 sm:w-56" />
           </div>
-          <Button onClick={startNew} className="gap-1"><Plus className="h-4 w-4" /> Nuevo</Button>
+          <Button onClick={startNew} className="gap-1 shrink-0"><Plus className="h-4 w-4" /> <span className="hidden sm:inline">Nuevo</span></Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -56,24 +56,24 @@ export default function ClientsList({ tenantId }) {
           {filtered.map((c) => {
             const visits = appointments.filter((a) => a.clientId === c.id).length;
             return (
-              <div key={c.id} className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 text-sm font-semibold text-slate-700">
+              <div key={c.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 text-sm font-semibold text-slate-700">
                     {c.firstName[0]}{c.lastName?.[0] || ''}
                   </div>
-                  <div>
-                    <div className="font-semibold text-slate-800">{c.firstName} {c.lastName}</div>
-                    <div className="flex items-center gap-3 text-xs text-slate-500">
-                      <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{c.email}</span>
-                      <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{c.phone}</span>
+                  <div className="min-w-0">
+                    <div className="truncate font-semibold text-slate-800">{c.firstName} {c.lastName}</div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                      {c.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3 shrink-0" />{c.email}</span>}
+                      {c.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3 shrink-0" />{c.phone}</span>}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary">{visits} citas</Badge>
-                  <span className="text-xs text-slate-400">Desde {dayjs(c.createdAt).format('DD/MM/YY')}</span>
-                  <Button variant="ghost" size="icon" onClick={() => startEdit(c)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4 text-rose-500" /></Button>
+                <div className="flex items-center gap-2 sm:gap-3 pl-13 sm:pl-0">
+                  <Badge variant="secondary" className="shrink-0">{visits} citas</Badge>
+                  <span className="hidden text-xs text-slate-400 md:inline">Desde {dayjs(c.createdAt).format('DD/MM/YY')}</span>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(c)}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => remove(c.id)}><Trash2 className="h-4 w-4 text-rose-500" /></Button>
                 </div>
               </div>
             );

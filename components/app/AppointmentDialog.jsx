@@ -68,6 +68,14 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
       return;
     }
 
+    // Warning de descanso (admin/empleado puede forzar)
+    if (within.warning === 'break' && !force) {
+      if (window.confirm(`⚠️ ${within.reason}\n\nSolo admin/empleados pueden reservar en horario de descanso (los clientes online no pueden).\n\n¿Crearla igualmente?`)) {
+        return handleSubmit(true);
+      }
+      return;
+    }
+
     // Overlap check (admin/empleado pueden forzar con confirmación)
     const overlap = hasOverlap({ start: start.toDate(), end: end.toDate(), employeeId: form.employeeId, tenantId, appointments });
     if (overlap && !force) {

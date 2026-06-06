@@ -32,15 +32,15 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="text-base">Reservas ({list.length})</CardTitle>
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-            <Input placeholder="Buscar cliente..." value={q} onChange={(e) => setQ(e.target.value)} className="w-56 pl-8" />
+            <Input placeholder="Buscar cliente..." value={q} onChange={(e) => setQ(e.target.value)} className="w-full pl-8 sm:w-56" />
           </div>
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los estados</SelectItem>
               {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -51,7 +51,8 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
+        {/* Tabla desktop */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
@@ -92,8 +93,42 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
               })}
             </tbody>
           </table>
-          {list.length === 0 && <div className="py-10 text-center text-sm text-slate-400">Sin reservas</div>}
         </div>
+
+        {/* Cards móvil */}
+        <div className="space-y-2 md:hidden">
+          {list.map((a) => {
+            const cli = clients.find((c) => c.id === a.clientId);
+            const svc = services.find((s) => s.id === a.serviceId);
+            const emp = employees.find((e) => e.id === a.employeeId);
+            const cfg = STATUS_CONFIG[a.status];
+            const pay = PAYMENT_STATUS[a.payment?.status];
+            return (
+              <button key={a.id} onClick={() => setDetailId(a.id)}
+                className="block w-full rounded-lg border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:shadow-sm">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-slate-800 truncate">{cli?.firstName} {cli?.lastName}</div>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-600">
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: svc?.color }} />
+                      <span className="truncate">{svc?.name}</span>
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-500">
+                      {dayjs(a.start).format('DD MMM, HH:mm')} · {emp?.firstName} {emp?.lastName}
+                    </div>
+                  </div>
+                  <Badge variant="outline" className={`${cfg.color} shrink-0`}>{cfg.label}</Badge>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <Badge variant="secondary" className={pay.color}>{pay.label} · {a.payment?.amount}€</Badge>
+                  <Eye className="h-4 w-4 text-slate-400" />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {list.length === 0 && <div className="py-10 text-center text-sm text-slate-400">Sin reservas</div>}
       </CardContent>
       <AppointmentDetailDialog appointmentId={detailId} onOpenChange={(v) => !v && setDetailId(null)} />
     </Card>
