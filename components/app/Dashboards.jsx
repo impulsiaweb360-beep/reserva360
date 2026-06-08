@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useApp } from '@/lib/store';
+import { useApp } from '@/lib/supabase-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Building2, TrendingUp, Calendar as CalIcon, Users, ArrowUpRight, Eye, Power, PowerOff, CreditCard, Link2, Copy, ExternalLink, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';

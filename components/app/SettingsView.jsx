@@ -1,6 +1,6 @@
 'use client';
 
-import { useApp } from '@/lib/store';
+import { useApp } from '@/lib/supabase-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

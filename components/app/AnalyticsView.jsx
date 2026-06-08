@@ -1,6 +1,6 @@
 'use client';
 
-import { useApp } from '@/lib/store';
+import { useApp } from '@/lib/supabase-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts';
 

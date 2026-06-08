@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { useApp } from '@/lib/store';
+import { useApp } from '@/lib/supabase-store';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

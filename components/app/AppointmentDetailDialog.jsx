@@ -1,7 +1,7 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useApp } from '@/lib/store';
+import { useApp } from '@/lib/supabase-store';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

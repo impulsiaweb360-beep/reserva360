@@ -1,6 +1,6 @@
 'use client';
 
-import { useApp } from '@/lib/store';
+import { useApp } from '@/lib/supabase-store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -89,8 +89,8 @@ export default function Shell({ active, setActive, children }) {
         </nav>
 
         <div className="border-t border-slate-200 p-3">
-          <Button variant="ghost" size="sm" onClick={resetDemo} className="w-full justify-start gap-2 text-slate-500">
-            <RefreshCw className="h-4 w-4" /> Resetear datos demo
+          <Button variant="ghost" size="sm" onClick={() => { window.location.href = '/api/auth/logout'; }} className="w-full justify-start gap-2 text-slate-500">
+            <LogOut className="h-4 w-4" /> Cerrar sesión
           </Button>
         </div>
       </aside>
@@ -146,8 +146,8 @@ export default function Shell({ active, setActive, children }) {
                     );
                   })}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={resetDemo} className="text-slate-500">
-                    <RefreshCw className="mr-2 h-4 w-4" /> Resetear datos demo
+                  <DropdownMenuItem onClick={() => { window.location.href = '/api/auth/logout'; }} className="text-rose-600">
+                    <LogOut className="mr-2 h-4 w-4" /> Cerrar sesión
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -176,7 +176,7 @@ export default function Shell({ active, setActive, children }) {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>Sesión demo</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-rose-600">
+                <DropdownMenuItem onClick={() => { window.location.href = '/api/auth/logout'; }} className="text-rose-600">
                   <LogOut className="mr-2 h-4 w-4" /> Cerrar sesión
                 </DropdownMenuItem>
               </DropdownMenuContent>
