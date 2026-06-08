@@ -12,11 +12,9 @@ const FEATURES = [
   { icon: Calendar, title: 'Calendario inteligente', desc: 'Vista semanal y diaria con detección automática de huecos libres y solapamientos.' },
   { icon: Globe, title: 'Reservas online 24/7', desc: 'Tu propia URL pública para que tus clientes reserven cuando quieran. Sin descargas, sin apps.' },
   { icon: Users, title: 'Multi-empleado', desc: 'Cada profesional con su agenda, horarios y vacaciones. Filtra por persona o ve todo el equipo.' },
-  { icon: Bell, title: 'Recordatorios automáticos', desc: 'Email 24h antes de cada cita. WhatsApp y SMS en planes superiores. Reduce las ausencias.' },
+  { icon: Bell, title: 'Recordatorios automáticos', desc: 'Email 24h antes de cada cita. Reduce las ausencias.' },
   { icon: CreditCard, title: 'Pagos integrados', desc: 'Cobra online por Stripe o en local. Pagos completos, parciales o señales según prefieras.' },
   { icon: BarChart3, title: 'Métricas en tiempo real', desc: 'Ingresos, servicios más reservados, empleados más ocupados. Decide con datos.' },
-  { icon: Shield, title: 'Datos seguros y aislados', desc: 'Aislamiento por negocio con Row Level Security. Cifrado en tránsito y reposo.' },
-  { icon: Smartphone, title: 'Móvil-first', desc: 'Funciona perfectamente en móvil, tablet y escritorio. Sin instalar nada.' },
 ];
 
 const INDUSTRIES = [
@@ -32,29 +30,31 @@ const INDUSTRIES = [
 
 const PLANS = [
   {
-    name: 'Starter', price: 19, popular: false,
+    id: 'starter',
+    name: 'Starter', price: 19, popular: false, hidden: false,
     desc: 'Para profesionales independientes que empiezan.',
     features: ['1 empleado', '100 reservas/mes', 'Recordatorios por email', 'Página pública de reservas', 'Soporte por email'],
   },
   {
-    name: 'Pro', price: 49, popular: true,
+    id: 'pro',
+    name: 'Pro', price: 39, popular: true, hidden: false,
     desc: 'Para negocios en crecimiento que necesitan más potencia.',
-    features: ['Hasta 10 empleados', 'Reservas ilimitadas', 'Recordatorios Email + WhatsApp', 'Pagos online con Stripe', 'Métricas avanzadas', 'Soporte prioritario'],
+    features: ['Plan Starter +', 'Hasta 10 empleados', 'Reservas ilimitadas', 'Pagos online con Stripe', 'Métricas avanzadas', 'Soporte prioritario'],
   },
   {
-    name: 'Business', price: 99, popular: false,
+    id: 'business',
+    name: 'Business', price: 99, popular: false, hidden: true,
     desc: 'Para clínicas y franquicias con varias sedes.',
-    features: ['Empleados ilimitados', 'Multi-sede', 'SMS + WhatsApp', 'API y Webhooks', 'Marca personalizada', 'Soporte dedicado'],
+    features: ['Plan Pro +', 'Empleados ilimitados', 'Multi-sede', 'SMS + WhatsApp', 'API y Webhooks', 'Marca personalizada', 'Soporte dedicado'],
   },
 ];
 
 const FAQ = [
   { q: '¿Puedo probarlo gratis?', a: 'Sí. Crea tu cuenta y prueba todas las funciones durante 14 días sin tarjeta de crédito.' },
   { q: '¿Mis clientes necesitan instalar una app?', a: 'No. Tus clientes reservan desde tu URL pública (ej: reserva360.com/tu-negocio) directamente en su navegador.' },
-  { q: '¿Cómo funcionan los recordatorios?', a: 'Reserva360 envía automáticamente un email 24h antes de cada cita. En planes Pro y Business también WhatsApp y SMS.' },
+  { q: '¿Cómo funcionan los recordatorios?', a: 'Reserva360 envía automáticamente un email 24h antes de cada cita para reducir las ausencias.' },
   { q: '¿Los datos están seguros?', a: 'Sí. Usamos Row Level Security para aislar los datos entre negocios y cifrado AES-256. Cumplimos GDPR.' },
   { q: '¿Puedo cancelar cuando quiera?', a: 'Sí, sin permanencia. Cancelas desde tu panel y dejas de pagar al instante.' },
-  { q: '¿Hay límite de clientes?', a: 'No, todos los planes incluyen clientes ilimitados. Solo varían empleados y canales de recordatorio.' },
 ];
 
 export default function LandingPage() {
@@ -218,8 +218,8 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Planes para cada tamaño de negocio</h2>
             <p className="mt-4 text-slate-600">Empieza gratis. Paga solo cuando tu negocio crezca.</p>
           </div>
-          <div className="mt-14 grid gap-6 md:grid-cols-3">
-            {PLANS.map((p) => (
+          <div className="mt-14 mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
+            {PLANS.filter((p) => !p.hidden).map((p) => (
               <Card key={p.name} className={p.popular ? 'border-2 border-indigo-500 shadow-2xl md:scale-105' : 'border-slate-200'}>
                 <CardContent className="p-8">
                   <div className="flex items-center justify-between">
