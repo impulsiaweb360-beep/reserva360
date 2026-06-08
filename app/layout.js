@@ -2,7 +2,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 
 export const metadata = {
-  title: 'Bookly · SaaS de Gestión de Citas',
+  title: 'Reserva360 · Gestión de Citas y Reservas',
   description: 'Plataforma multi-tenant de reservas para fisios, peluquerías, veterinarios y más.',
 };
 

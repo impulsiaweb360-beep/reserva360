@@ -362,7 +362,7 @@ function BookFlow() {
 
       <footer className="border-t border-slate-200 bg-white py-6">
         <div className="container mx-auto px-6 text-center text-xs text-slate-400">
-          Powered by <span className="font-semibold text-slate-600">Bookly</span> · Reserva online segura
+          Powered by <span className="font-semibold text-slate-600">Reserva360</span> · Reserva online segura
         </div>
       </footer>
     </div>

@@ -55,11 +55,8 @@ export default function Shell({ active, setActive, children }) {
       {/* Sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-white md:flex">
         <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-5">
-          <div className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${roleColor} text-white shadow-md`}>
-            <Calendar className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-sm font-bold leading-tight tracking-tight">Bookly</div>
+          <img src="/logo-reserva360.png" alt="Reserva360" className="h-8 w-auto" />
+          <div className="ml-1">
             <div className="text-[10px] uppercase tracking-wider text-slate-500">{roleLabel}</div>
           </div>
         </div>
@@ -113,7 +110,7 @@ export default function Shell({ active, setActive, children }) {
           <div className="flex items-center gap-2">
             {/* Desktop: solo título */}
             <h1 className="hidden text-lg font-semibold tracking-tight text-slate-800 md:block">
-              {items.find((i) => i.id === active)?.label || 'Bookly'}
+              {items.find((i) => i.id === active)?.label || 'Reserva360'}
             </h1>
             {/* Mobile: dropdown completo de navegación */}
             <div className="md:hidden">
@@ -126,7 +123,7 @@ export default function Shell({ active, setActive, children }) {
                       return (
                         <>
                           {Icon && <Icon className="h-4 w-4" />}
-                          {cur?.label || 'Bookly'}
+                          {cur?.label || 'Reserva360'}
                           <ChevronDown className="h-4 w-4 text-slate-400" />
                         </>
                       );

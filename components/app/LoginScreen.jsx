@@ -16,10 +16,7 @@ export default function LoginScreen() {
       <header className="border-b border-slate-200/70 bg-white/80 backdrop-blur sticky top-0 z-40">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight">Bookly</span>
+            <img src="/logo-reserva360.png" alt="Reserva360" className="h-9 w-auto" />
             <Badge variant="secondary" className="ml-2">Demo</Badge>
           </div>
           <Button variant="ghost" size="sm" onClick={resetDemo} className="gap-2">
@@ -30,13 +27,19 @@ export default function LoginScreen() {
 
       <section className="container mx-auto px-6 py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <Badge className="mb-4 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
-            <Sparkles className="mr-1 h-3 w-3" /> SaaS Multi-Tenant
-          </Badge>
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-            Gestión de citas y reservas <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">para cualquier negocio</span>
+            Gestione citas y reservas <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">para cualquier negocio</span>
           </h1>
-          <p className="mt-4 text-lg text-slate-600">
+
+          <div className="my-10 flex justify-center">
+            <img
+              src="/logo-reserva360.png"
+              alt="Reserva360"
+              className="h-32 w-auto sm:h-40 md:h-48 lg:h-56 drop-shadow-sm"
+            />
+          </div>
+
+          <p className="mt-2 text-lg text-slate-600">
             Fisios, peluquerías, veterinarios, barberías, nutricionistas… todo bajo una sola plataforma.
           </p>
           <p className="mt-2 text-sm text-slate-500">Elige cómo quieres explorar la demo:</p>
