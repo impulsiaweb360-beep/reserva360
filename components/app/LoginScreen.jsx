@@ -4,7 +4,7 @@ import { useApp } from '@/lib/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Building2, UserRound, Calendar, Sparkles, ArrowRight, RefreshCw } from 'lucide-react';
+import { Shield, Building2, UserRound, Calendar, Sparkles, ArrowRight, RefreshCw, Mail, LogIn, Download } from 'lucide-react';
 
 export default function LoginScreen() {
   const { tenants, employees, login, resetDemo } = useApp();
@@ -17,11 +17,15 @@ export default function LoginScreen() {
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-2">
             <img src="/logo-reserva360.png" alt="Reserva360" className="h-9 w-auto" />
-            <Badge variant="secondary" className="ml-2">Demo</Badge>
           </div>
-          <Button variant="ghost" size="sm" onClick={resetDemo} className="gap-2">
-            <RefreshCw className="h-4 w-4" /> Resetear demo
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => { window.location.href = 'mailto:reserva360.app@gmail.com?subject=Contacto%20Reserva360'; }} className="gap-2">
+              <Mail className="h-4 w-4" /> Contacto
+            </Button>
+            <Button size="sm" className="gap-2">
+              <LogIn className="h-4 w-4" /> Iniciar sesión / Crear cuenta
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -138,6 +142,11 @@ export default function LoginScreen() {
         <p className="mt-12 text-center text-xs text-slate-400">
           Demo con datos mock · Cambios persisten en tu navegador · Multi-tenant aislado por tenant_id
         </p>
+        <div className="mt-4 flex justify-center">
+          <Button variant="outline" size="sm" onClick={() => window.open('/reserva360-supabase-schema.sql', '_blank')} className="gap-2">
+            <Download className="h-4 w-4" /> Descargar SQL para Supabase
+          </Button>
+        </div>
       </section>
     </div>
   );
