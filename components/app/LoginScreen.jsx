@@ -14,17 +14,20 @@ export default function LoginScreen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
       <header className="border-b border-slate-200/70 bg-white/80 backdrop-blur sticky top-0 z-40">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
+        <div className="container mx-auto flex items-center justify-between gap-3 px-6 py-3">
           <div className="flex items-center gap-2">
             <img src="/logo-reserva360.png" alt="Reserva360" className="h-9 w-auto" />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-3">
             <Button variant="ghost" size="sm" onClick={() => { window.location.href = 'mailto:reserva360.app@gmail.com?subject=Contacto%20Reserva360'; }} className="gap-2">
               <Mail className="h-4 w-4" /> Contacto
             </Button>
-            <Button size="sm" className="gap-2">
-              <LogIn className="h-4 w-4" /> Iniciar sesión / Crear cuenta
-            </Button>
+            <div className="flex flex-col items-end">
+              <Button size="sm" className="gap-2" onClick={() => { window.location.href = '/auth/login'; }}>
+                <LogIn className="h-4 w-4" /> Iniciar sesión
+              </Button>
+              <a href="/auth/signup" className="mt-1 text-xs text-indigo-600 hover:underline">Crear cuenta</a>
+            </div>
           </div>
         </div>
       </header>
@@ -139,14 +142,6 @@ export default function LoginScreen() {
           </Card>
         </div>
 
-        <p className="mt-12 text-center text-xs text-slate-400">
-          Demo con datos mock · Cambios persisten en tu navegador · Multi-tenant aislado por tenant_id
-        </p>
-        <div className="mt-4 flex justify-center">
-          <Button variant="outline" size="sm" onClick={() => window.open('/reserva360-supabase-schema.sql', '_blank')} className="gap-2">
-            <Download className="h-4 w-4" /> Descargar SQL para Supabase
-          </Button>
-        </div>
       </section>
     </div>
   );
