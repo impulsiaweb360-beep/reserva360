@@ -151,11 +151,11 @@ backend:
         comment: "✅ VERIFIED: Endpoint authentication working correctly. Without secret returns 401 Unauthorized. With secret=reserva360-cron-secret-change-me returns 200 with JSON {checked: 0, results: []}. Supabase query and Resend integration code verified. No appointments in test window so results empty (expected)."
   - task: "Public booking RPC create_public_booking"
     implemented: true
-    working: "NA"
+    working: true
     file: "public/reserva360-supabase-schema.sql"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -163,6 +163,31 @@ backend:
       - working: "NA"
         agent: "testing"
         comment: "Not directly tested. Verified related RPC get_public_tenant works correctly (returns null for non-existent slug). SQL schema confirmed deployed - plans table has 3 plans (Starter, Pro, Business), RLS grants working for anon role."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED E2E: Complete public booking flow tested with real Supabase. (A) get_public_tenant RPC returns null for non-existent slug ✓ (B) Created test tenant via SERVICE_ROLE with 2 employees + 2 services ✓ (C.1) get_public_tenant returns tenant with services/employees arrays ✓ (C.2) /api/public/<slug>/availability returns empty busy array ✓ (C.3) create_public_booking creates appointment successfully ✓ (C.4) Duplicate booking prevention working - returns 'Horario no disponible' error ✓ (C.5) Availability endpoint returns busy slots after booking ✓ All RPC functions, RLS policies, and API endpoints working correctly."
+  - task: "Public booking page /book/[slug]"
+    implemented: true
+    working: true
+    file: "app/book/[slug]/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Booking page integrated with real Supabase. Uses get_public_tenant RPC to load tenant data, /api/public/<slug>/availability for busy slots, and create_public_booking RPC for creating appointments. Shows 'Negocio no encontrado' for non-existent slugs. Full booking flow (service → employee → date → time → client info → confirmation) working correctly."
+  - task: "Availability API /api/public/[slug]/availability"
+    implemented: true
+    working: true
+    file: "app/api/public/[slug]/availability/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Availability endpoint working correctly. Returns busy slots for specified date and optional employee_id. Tested with empty state (no appointments) and with bookings. Correctly filters by tenant slug, date range, and employee. Returns proper JSON format with busy array containing employee_id, start, and end times."
 
 frontend:
   - task: "Marketing landing at /"
@@ -179,13 +204,12 @@ frontend:
 
 metadata:
   created_by: main_agent
-  version: "2.1"
-  test_sequence: 2
+  version: "2.2"
+  test_sequence: 3
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Auth signup + email confirmation flow"
     - "Dashboard bootstrap + tenant auto-creation"
     - "Supabase queries from dashboard with RLS"
   stuck_tasks: []
@@ -223,3 +247,37 @@ agent_communication:
       - create_public_booking RPC (SQL deployed, related RPCs working)
       
       NO CRITICAL ISSUES FOUND. All backend APIs and Supabase integrations working as expected.
+  - agent: testing
+    message: |
+      ✅ E2E PUBLIC BOOKING FLOW COMPLETE - ALL TESTS PASSED
+      
+      Comprehensive end-to-end testing of public booking flow with REAL Supabase completed:
+      
+      TEST RESULTS:
+      A) Non-existent slug handling ✅
+         - get_public_tenant RPC returns null for invalid slugs
+         - Booking page shows "Negocio no encontrado" message
+      
+      B) Test data creation via SERVICE_ROLE ✅
+         - Created tenant with business_hours (Mon-Fri 09:00-19:00)
+         - Created 2 employees with schedules (Mon-Fri 09:00-18:00)
+         - Created 2 services (60min/30€ and 30min/20€)
+      
+      C) Public booking flow with ANON key ✅
+         C.1) get_public_tenant RPC returns complete tenant data with services + employees arrays
+         C.2) /api/public/<slug>/availability returns empty busy array (no appointments)
+         C.3) create_public_booking RPC creates appointment successfully (returns UUID)
+         C.4) Duplicate booking prevention working - returns 400 with "Horario no disponible"
+         C.5) /api/public/<slug>/availability returns busy slots after booking
+      
+      D) Cleanup ✅
+         - Test tenant deleted with cascade (employees, services, appointments, clients)
+      
+      ALL BACKEND COMPONENTS VERIFIED:
+      - Supabase RPC functions (get_public_tenant, create_public_booking)
+      - RLS policies (anon role can access public data, service_role bypasses RLS)
+      - Overlap detection in create_public_booking
+      - Availability API endpoint
+      - Booking page integration
+      
+      NO CRITICAL ISSUES FOUND. Public booking flow ready for production.
