@@ -9,6 +9,16 @@ const nextConfig = {
   experimental: {
     // Remove if not using Server Components
     serverComponentsExternalPackages: ['mongodb'],
+    serverActions: {
+      // Permitir orígenes del proxy de Kubernetes (ingress reescribe el host)
+      allowedOrigins: [
+        'schedule-sync-141.preview.emergentagent.com',
+        'schedule-sync-141.cluster-5.preview.emergentcf.cloud',
+        '*.preview.emergentagent.com',
+        '*.preview.emergentcf.cloud',
+        'localhost:3000',
+      ],
+    },
   },
   webpack(config, { dev }) {
     if (dev) {

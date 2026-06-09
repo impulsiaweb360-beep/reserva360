@@ -89,9 +89,6 @@ export default function LandingPage() {
       {/* HERO */}
       <section className="bg-gradient-to-br from-slate-50 via-white to-indigo-50">
         <div className="container mx-auto px-6 py-20 text-center">
-          <Badge className="mb-6 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
-            <Sparkles className="mr-1 h-3 w-3" /> El SaaS de citas para tu negocio
-          </Badge>
           <div className="mb-8 flex justify-center">
             <img src="/logo-reserva360.png" alt="Reserva360" className="h-28 w-auto sm:h-36 md:h-44 lg:h-52 drop-shadow-sm" />
           </div>
