@@ -44,7 +44,7 @@ function normalizeTenant(raw) {
       lastName: e.last_name,
       specialty: e.specialty,
       color: e.color,
-      schedule: e.schedule,
+      schedule: (e.schedule && Object.keys(e.schedule).length > 0) ? e.schedule : null,
       active: e.active,
     })),
   };
@@ -193,16 +193,20 @@ export default function BookPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="container mx-auto flex flex-col items-start gap-3 px-6 py-6 md:flex-row md:items-center">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl shadow" style={{ background: `${tenant.color}15`, border: `2px solid ${tenant.color}30` }}>
-            {tenant.logo}
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl text-3xl shadow overflow-hidden" style={{ background: `${tenant.color}15`, border: `2px solid ${tenant.color}30` }}>
+            {tenant.logo && /^https?:\/\//.test(tenant.logo) ? (
+              <img src={tenant.logo} alt={tenant.name} className="h-full w-full object-contain p-1" />
+            ) : (
+              <span>{tenant.logo || '✨'}</span>
+            )}
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{tenant.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900" translate="no">{tenant.name}</h1>
             <p className="text-sm text-slate-500">{tenant.industry}</p>
             <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
-              {tenant.address && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{tenant.address}</span>}
-              {tenant.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{tenant.phone}</span>}
-              {tenant.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{tenant.email}</span>}
+              {tenant.address && <span className="flex items-center gap-1" translate="no"><MapPin className="h-3 w-3" />{tenant.address}</span>}
+              {tenant.phone && <span className="flex items-center gap-1" translate="no"><Phone className="h-3 w-3" />{tenant.phone}</span>}
+              {tenant.email && <span className="flex items-center gap-1" translate="no"><Mail className="h-3 w-3" />{tenant.email}</span>}
             </div>
           </div>
           <Badge style={{ background: `${tenant.color}20`, color: tenant.color }} className="border-0">

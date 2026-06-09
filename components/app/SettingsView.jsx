@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { Mail, MessageCircle, Smartphone, Shield, KeyRound, Webhook } from 'lucide-react';
 import BusinessHoursEditor from './BusinessHoursEditor';
+import LogoEditor from './LogoEditor';
 
 export default function SettingsView({ tenantId }) {
   const { tenants, updateTenant, plans } = useApp();
@@ -55,6 +56,9 @@ export default function SettingsView({ tenantId }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Logo del negocio */}
+      <LogoEditor tenantId={tenantId} />
 
       {/* Editor de horarios y vacaciones */}
       <BusinessHoursEditor tenantId={tenantId} />
