@@ -1,11 +1,11 @@
 {
   "crons": [
     {
-      "path": "/api/cron/reminders-24h?secret=PON_AQUI_TU_CRON_SECRET",
+      "path": "/api/cron/reminders-24h?secret=f320bcee8246b8b62ede291002e5b802b4f66e996067457661cc113693421cd2",
       "schedule": "*/15 * * * *"
     },
     {
-      "path": "/api/cron/reminders-2h?secret=PON_AQUI_TU_CRON_SECRET",
+      "path": "/api/cron/reminders-2h?secret=f320bcee8246b8b62ede291002e5b802b4f66e996067457661cc113693421cd2",
       "schedule": "*/15 * * * *"
     }
   ]
