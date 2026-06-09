@@ -65,29 +65,16 @@ export default function SettingsView({ tenantId }) {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base">Recordatorios automáticos</CardTitle></CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
+          <CardHeader><CardTitle className="text-base">Recordatorios automáticos por email</CardTitle></CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border p-4">
-              <div className="mb-2 flex items-center justify-between"><div className="flex items-center gap-2"><Mail className="h-4 w-4 text-indigo-600" /><span className="font-semibold">Email</span></div><Switch defaultChecked /></div>
-              <p className="text-xs text-slate-500">Confirmación + recordatorios 24h y 2h antes.</p>
+              <div className="mb-2 flex items-center justify-between"><div className="flex items-center gap-2"><Mail className="h-4 w-4 text-indigo-600" /><span className="font-semibold">Recordatorio 24h antes</span></div><Switch defaultChecked /></div>
+              <p className="text-xs text-slate-500">Se envía automáticamente un email a tu cliente 24 horas antes de su cita.</p>
             </div>
             <div className="rounded-lg border p-4">
-              <div className="mb-2 flex items-center justify-between"><div className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-emerald-600" /><span className="font-semibold">WhatsApp</span></div><Switch defaultChecked /></div>
-              <p className="text-xs text-slate-500">Conectado con Twilio WhatsApp Business.</p>
+              <div className="mb-2 flex items-center justify-between"><div className="flex items-center gap-2"><Mail className="h-4 w-4 text-emerald-600" /><span className="font-semibold">Recordatorio 2h antes</span></div><Switch defaultChecked /></div>
+              <p className="text-xs text-slate-500">Se envía un email 2 horas antes de la cita para reducir aún más las ausencias.</p>
             </div>
-            <div className="rounded-lg border p-4">
-              <div className="mb-2 flex items-center justify-between"><div className="flex items-center gap-2"><Smartphone className="h-4 w-4 text-amber-600" /><span className="font-semibold">SMS</span></div><Switch /></div>
-              <p className="text-xs text-slate-500">Disponible en plan Business.</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base">Seguridad y auditoría</CardTitle></CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            <div className="flex items-start gap-3 rounded-lg border p-4"><Shield className="h-5 w-5 text-indigo-600" /><div><div className="font-semibold">Row Level Security</div><div className="text-xs text-slate-500">Activo – aislamiento por tenant_id</div></div></div>
-            <div className="flex items-start gap-3 rounded-lg border p-4"><KeyRound className="h-5 w-5 text-emerald-600" /><div><div className="font-semibold">Auditoría</div><div className="text-xs text-slate-500">Todos los cambios registrados</div></div></div>
-            <div className="flex items-start gap-3 rounded-lg border p-4"><Webhook className="h-5 w-5 text-amber-600" /><div><div className="font-semibold">Rate limiting</div><div className="text-xs text-slate-500">100 req/min por tenant</div></div></div>
           </CardContent>
         </Card>
       </div>

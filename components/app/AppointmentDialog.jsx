@@ -148,9 +148,15 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs">Fecha y hora</Label>
-              <Input type="datetime-local" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} />
+              <Label className="text-xs">Fecha</Label>
+              <Input type="date" value={form.start.slice(0, 10)} onChange={(e) => setForm({ ...form, start: `${e.target.value}T${form.start.slice(11) || '09:00'}` })} />
             </div>
+            <div>
+              <Label className="text-xs">Hora</Label>
+              <Input type="time" step="900" value={form.start.slice(11, 16) || '09:00'} onChange={(e) => setForm({ ...form, start: `${form.start.slice(0, 10) || dayjs().format('YYYY-MM-DD')}T${e.target.value}` })} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Estado</Label>
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
@@ -161,6 +167,7 @@ export default function AppointmentDialog({ open, onOpenChange, tenantId, init, 
                 </SelectContent>
               </Select>
             </div>
+            <div />
           </div>
 
           <div>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, LayoutGrid } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, LayoutGrid, AlertTriangle } from 'lucide-react';
 import AppointmentDialog from './AppointmentDialog';
 import AppointmentDetailDialog from './AppointmentDetailDialog';
 import { STATUS_CONFIG } from '@/lib/mockData';
@@ -182,6 +182,19 @@ export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = 
 
           {days.map((d) => {
             const dayAppts = apptsByDay(d);
+            // Detectar solapamientos: marcar cada cita con flag overlap si se solapa con otra del mismo empleado
+            const overlapIds = new Set();
+            for (let i = 0; i < dayAppts.length; i++) {
+              for (let j = i + 1; j < dayAppts.length; j++) {
+                const a = dayAppts[i], b = dayAppts[j];
+                if (a.employeeId !== b.employeeId) continue;
+                if (a.status === 'cancelled' || b.status === 'cancelled') continue;
+                if (dayjs(a.start).isBefore(b.end) && dayjs(a.end).isAfter(b.start)) {
+                  overlapIds.add(a.id);
+                  overlapIds.add(b.id);
+                }
+              }
+            }
             return (
               <div key={d.toString()} className="relative border-r border-slate-200">
                 {HOURS.map((h) => (
@@ -200,10 +213,16 @@ export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = 
                   const cli = clients.find((c) => c.id === a.clientId);
                   const emp = employees.find((e) => e.id === a.employeeId);
                   const cfg = STATUS_CONFIG[a.status];
+                  const isOverlap = overlapIds.has(a.id);
                   return (
                     <button key={a.id} onClick={() => setDetailId(a.id)}
-                      className="absolute left-1 right-1 overflow-hidden rounded-md border-l-4 bg-white p-1.5 text-left text-[11px] shadow-sm transition hover:shadow-md"
+                      className={`absolute left-1 right-1 overflow-hidden rounded-md border-l-4 p-1.5 text-left text-[11px] shadow-sm transition hover:shadow-md ${isOverlap ? 'bg-rose-50 ring-2 ring-rose-400 ring-offset-1' : 'bg-white'}`}
                       style={{ top, height, borderLeftColor: svc?.color || emp?.color || '#6366f1' }}>
+                      {isOverlap && (
+                        <span className="absolute right-1 top-1 flex h-4 items-center gap-0.5 rounded bg-rose-500 px-1 text-[8px] font-bold text-white">
+                          <AlertTriangle className="h-2.5 w-2.5" /> SOLAPADA
+                        </span>
+                      )}
                       <div className="truncate font-semibold text-slate-800">{cli ? `${cli.firstName} ${cli.lastName}` : 'Cliente'}</div>
                       <div className="truncate text-slate-500">{svc?.name}</div>
                       {height > 50 && (
