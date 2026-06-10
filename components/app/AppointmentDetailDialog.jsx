@@ -20,6 +20,7 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
   const emp = employees.find((e) => e.id === a.employeeId);
   const cfg = STATUS_CONFIG[a.status];
   const pay = PAYMENT_STATUS[a.payment?.status];
+  const amount = a.payment?.amount ?? svc?.price ?? 0;
 
   const setStatus = (status) => {
     appointmentsApi.update(a.id, { status });
@@ -54,7 +55,7 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
           <div className="flex items-center gap-3"><User className="h-4 w-4 text-slate-400" /> <div><b>{cli?.firstName} {cli?.lastName}</b> <span className="text-slate-500">{cli?.phone}</span></div></div>
           <div className="flex items-center gap-3"><Briefcase className="h-4 w-4 text-slate-400" /> <div><b>{svc?.name}</b> · <span className="text-slate-500">{svc?.duration} min · {svc?.price}€</span></div></div>
           <div className="flex items-center gap-3"><User className="h-4 w-4 text-slate-400" /> <span>Con <b>{emp?.firstName} {emp?.lastName}</b></span></div>
-          <div className="flex items-center gap-3"><CreditCard className="h-4 w-4 text-slate-400" /> <div>Pago <Badge variant="secondary" className={pay.color}>{pay.label}</Badge> · {a.payment?.amount}€</div></div>
+          <div className="flex items-center gap-3"><CreditCard className="h-4 w-4 text-slate-400" /> <div>Pago <Badge variant="secondary" className={pay.color}>{pay.label}</Badge> · {amount}€</div></div>
           {a.notes && <div className="rounded-lg border bg-slate-50 p-2 text-xs text-slate-600">{a.notes}</div>}
         </div>
         <DialogFooter className="flex-wrap gap-2 sm:justify-start">

@@ -50,7 +50,7 @@ const PLANS = [
 
 const FAQ = [
   { q: '¿Puedo probarlo gratis?', a: 'Sí. Crea tu cuenta y prueba todas las funciones durante 14 días sin tarjeta de crédito.' },
-  { q: '¿Mis clientes necesitan instalar una app?', a: 'No. Tus clientes reservan desde tu URL pública (ej: reserva360.com/tu-negocio) directamente en su navegador.' },
+  { q: '¿Mis clientes necesitan instalar una app?', a: 'No. Tus clientes reservan desde tu URL pública (ej: reserva360.es/tu-negocio) directamente en su navegador.' },
   { q: '¿Cómo funcionan los recordatorios?', a: 'Reserva360 envía automáticamente un email 24h antes de cada cita para reducir las ausencias.' },
   { q: '¿Los datos están seguros?', a: 'Sí. Usamos Row Level Security para aislar los datos entre negocios y cifrado AES-256. Cumplimos GDPR.' },
   { q: '¿Puedo cancelar cuando quiera?', a: 'Sí, sin permanencia. Cancelas desde tu panel y dejas de pagar al instante.' },

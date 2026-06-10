@@ -82,6 +82,7 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
                 const emp = employees.find((e) => e.id === a.employeeId);
                 const cfg = STATUS_CONFIG[a.status];
                 const pay = PAYMENT_STATUS[a.payment?.status];
+                const amount = a.payment?.amount ?? svc?.price ?? 0;
                 return (
                   <tr key={a.id} className="border-b border-slate-100 hover:bg-slate-50">
                     <td className="py-3">
@@ -94,7 +95,7 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
                     </td>
                     <td>{emp?.firstName} {emp?.lastName}</td>
                     <td><Badge variant="outline" className={cfg.color}>{cfg.label}</Badge></td>
-                    <td><Badge variant="secondary" className={pay.color}>{pay.label} · {a.payment?.amount}€</Badge></td>
+                    <td><Badge variant="secondary" className={pay.color}>{pay.label} · {amount}€</Badge></td>
                     <td className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => setDetailId(a.id)} title="Ver detalle"><Eye className="h-4 w-4" /></Button>
@@ -116,6 +117,7 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
             const emp = employees.find((e) => e.id === a.employeeId);
             const cfg = STATUS_CONFIG[a.status];
             const pay = PAYMENT_STATUS[a.payment?.status];
+            const amount = a.payment?.amount ?? svc?.price ?? 0;
             return (
               <button key={a.id} onClick={() => setDetailId(a.id)}
                 className="block w-full rounded-lg border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:shadow-sm">
@@ -133,7 +135,7 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
                   <Badge variant="outline" className={`${cfg.color} shrink-0`}>{cfg.label}</Badge>
                 </div>
                 <div className="mt-2 flex items-center justify-between">
-                  <Badge variant="secondary" className={pay.color}>{pay.label} · {a.payment?.amount}€</Badge>
+                  <Badge variant="secondary" className={pay.color}>{pay.label} · {amount}€</Badge>
                   <div className="flex items-center gap-1">
                     <button onClick={(e) => handleDelete(e, a.id)} className="rounded p-1 hover:bg-rose-50" title="Eliminar">
                       <Trash2 className="h-4 w-4 text-rose-500" />

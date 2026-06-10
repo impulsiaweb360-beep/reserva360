@@ -450,6 +450,7 @@ as $$
 declare
   v_tenant_id uuid;
   v_duration int;
+  v_price numeric(10,2);
   v_end timestamptz;
   v_client_id uuid;
   v_appointment_id uuid;
@@ -464,8 +465,8 @@ begin
   if v_tenant_id is null then raise exception 'Negocio no encontrado'; end if;
   if not v_tenant_active then raise exception 'Negocio no activo'; end if;
 
-  -- Validar servicio y obtener duración
-  select duration_minutes into v_duration
+  -- Validar servicio y obtener duración + precio
+  select duration_minutes, price into v_duration, v_price
     from public.services
    where id = p_service_id and tenant_id = v_tenant_id and active = true;
   if v_duration is null then raise exception 'Servicio no disponible'; end if;
@@ -508,10 +509,10 @@ begin
   -- Crear reserva
   insert into public.appointments (
     tenant_id, employee_id, client_id, service_id, start_at, end_at,
-    status, notes, source, payment_status, payment_method
+    status, notes, source, payment_status, payment_method, payment_amount
   ) values (
     v_tenant_id, p_employee_id, v_client_id, p_service_id, p_start, v_end,
-    'confirmed', p_client_notes, 'online', 'pending', 'onsite'
+    'confirmed', p_client_notes, 'online', 'pending', 'onsite', v_price
   ) returning id into v_appointment_id;
 
   return v_appointment_id;

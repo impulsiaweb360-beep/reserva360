@@ -147,7 +147,18 @@ export function TenantDashboard({ tenantId }) {
   const weekCount = myAppts.filter((a) => dayjs(a.start).isAfter(today) && dayjs(a.start).isBefore(weekEnd)).length;
   const monthCount = myAppts.filter((a) => dayjs(a.start).isAfter(today) && dayjs(a.start).isBefore(monthEnd)).length;
   const newClients = myClients.filter((c) => dayjs(c.createdAt).isAfter(dayjs().subtract(30, 'day'))).length;
-  const revenue = myAppts.filter((a) => a.payment?.status === 'paid').reduce((s, a) => s + (a.payment?.amount || 0), 0);
+  // Importe efectivo (usa precio del servicio si no hay amount registrado)
+  const amountOf = (a) => {
+    if (a.payment?.amount != null) return Number(a.payment.amount);
+    const svc = myServices.find((s) => s.id === a.serviceId);
+    return Number(svc?.price || 0);
+  };
+  const revenue = myAppts
+    .filter((a) => a.payment?.status === 'paid')
+    .reduce((s, a) => s + amountOf(a), 0);
+  const expected = myAppts
+    .filter((a) => a.status !== 'cancelled' && a.payment?.status !== 'paid')
+    .reduce((s, a) => s + amountOf(a), 0);
 
   // Bookings per day this week
   const weekData = useMemo(() => {
@@ -207,7 +218,7 @@ export function TenantDashboard({ tenantId }) {
         <Stat icon={CalIcon} label="Esta semana" value={weekCount} color="sky" />
         <Stat icon={CalIcon} label="Este mes" value={monthCount} color="violet" />
         <Stat icon={Users} label="Nuevos clientes" value={newClients} sub="Últimos 30 días" color="emerald" />
-        <Stat icon={CreditCard} label="Ingresos" value={`${revenue} €`} sub="Cobrados" color="amber" />
+        <Stat icon={CreditCard} label="Ingresos" value={`${revenue} €`} sub={expected > 0 ? `+${expected} € por cobrar` : 'Cobrados'} color="amber" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

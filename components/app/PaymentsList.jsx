@@ -13,11 +13,18 @@ export default function PaymentsList({ tenantId }) {
   const { byTenant, clients, services } = useApp();
   const appts = byTenant('appointments', tenantId);
 
+  // Helper: importe efectivo de una cita (usa precio del servicio si no hay amount)
+  const amountOf = (a) => {
+    if (a.payment?.amount != null) return Number(a.payment.amount);
+    const svc = services.find((s) => s.id === a.serviceId);
+    return Number(svc?.price || 0);
+  };
+
   const paid = appts.filter((a) => a.payment?.status === 'paid');
   const pending = appts.filter((a) => a.payment?.status === 'pending');
   const failed = appts.filter((a) => a.payment?.status === 'failed');
-  const total = paid.reduce((s, a) => s + (a.payment?.amount || 0), 0);
-  const pendingTotal = pending.reduce((s, a) => s + (a.payment?.amount || 0), 0);
+  const total = paid.reduce((s, a) => s + amountOf(a), 0);
+  const pendingTotal = pending.reduce((s, a) => s + amountOf(a), 0);
 
   const stat = (label, value, sub, color, Icon) => (
     <Card><CardContent className="p-5">
@@ -66,7 +73,7 @@ export default function PaymentsList({ tenantId }) {
                     <td>{cli?.firstName} {cli?.lastName}</td>
                     <td>{svc?.name}</td>
                     <td className="capitalize">{a.payment?.method === 'stripe' ? 'Stripe' : a.payment?.method === 'onsite' ? 'Presencial' : 'Parcial'}</td>
-                    <td className="text-right font-semibold">{a.payment?.amount}€</td>
+                    <td className="text-right font-semibold">{amountOf(a)}€</td>
                     <td className="text-right"><Badge variant="secondary" className={pay.color}>{pay.label}</Badge></td>
                   </tr>
                 );
