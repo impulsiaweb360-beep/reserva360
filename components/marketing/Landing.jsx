@@ -13,7 +13,6 @@ const FEATURES = [
   { icon: Globe, title: 'Reservas online 24/7', desc: 'Tu propia URL pública para que tus clientes reserven cuando quieran. Sin descargas, sin apps.' },
   { icon: Users, title: 'Multi-empleado', desc: 'Cada profesional con su agenda, horarios y vacaciones. Filtra por persona o ve todo el equipo.' },
   { icon: Bell, title: 'Recordatorios automáticos', desc: 'Email 24h antes de cada cita. Reduce las ausencias.' },
-  { icon: CreditCard, title: 'Pagos integrados', desc: 'Cobra online por Stripe o en local. Pagos completos, parciales o señales según prefieras.' },
   { icon: BarChart3, title: 'Métricas en tiempo real', desc: 'Ingresos, servicios más reservados, empleados más ocupados. Decide con datos.' },
 ];
 
