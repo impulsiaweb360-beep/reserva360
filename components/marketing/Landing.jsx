@@ -70,16 +70,13 @@ export default function LandingPage() {
             <a href="#industries" className="hover:text-slate-900">Para quién</a>
             <a href="#faq" className="hover:text-slate-900">Preguntas</a>
           </nav>
-          <div className="flex items-start gap-3">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild className="gap-2">
               <a href="mailto:reserva360.app@gmail.com?subject=Contacto%20Reserva360"><Mail className="h-4 w-4" /> Contacto</a>
             </Button>
-            <div className="flex flex-col items-end">
-              <Button size="sm" asChild>
-                <Link href="/auth/login">Iniciar sesión</Link>
-              </Button>
-              <Link href="/auth/signup" className="mt-1 text-xs text-indigo-600 hover:underline">Crear cuenta</Link>
-            </div>
+            <Button size="sm" asChild>
+              <Link href="/auth/login">Iniciar sesión</Link>
+            </Button>
           </div>
         </div>
       </header>
