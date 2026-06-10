@@ -66,14 +66,10 @@ export default function SettingsView({ tenantId }) {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle className="text-base">Recordatorios automáticos por email</CardTitle></CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
+          <CardContent>
             <div className="rounded-lg border p-4">
               <div className="mb-2 flex items-center justify-between"><div className="flex items-center gap-2"><Mail className="h-4 w-4 text-indigo-600" /><span className="font-semibold">Recordatorio 24h antes</span></div><Switch defaultChecked /></div>
-              <p className="text-xs text-slate-500">Se envía automáticamente un email a tu cliente 24 horas antes de su cita.</p>
-            </div>
-            <div className="rounded-lg border p-4">
-              <div className="mb-2 flex items-center justify-between"><div className="flex items-center gap-2"><Mail className="h-4 w-4 text-emerald-600" /><span className="font-semibold">Recordatorio 2h antes</span></div><Switch defaultChecked /></div>
-              <p className="text-xs text-slate-500">Se envía un email 2 horas antes de la cita para reducir aún más las ausencias.</p>
+              <p className="text-xs text-slate-500">Se envía automáticamente un email a tu cliente 24 horas antes de su cita para reducir las ausencias.</p>
             </div>
           </CardContent>
         </Card>
