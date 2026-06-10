@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Calendar, LayoutDashboard, Users, Briefcase, UserRound, Settings, LogOut, BarChart3, CreditCard, Building2, Shield, ChevronDown, RefreshCw, Bell, X } from 'lucide-react';
+import TenantLogo from '@/components/app/TenantLogo';
 
 const SIDEBAR_BY_ROLE = {
   super_admin: [
@@ -64,7 +65,13 @@ export default function Shell({ active, setActive, children }) {
         {tenant && (
           <div className="border-b border-slate-200 px-4 py-3">
             <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-              <span className="text-xl">{tenant.logo}</span>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white border border-slate-200 overflow-hidden">
+                {tenant.logo && /^https?:\/\//.test(tenant.logo) ? (
+                  <img src={tenant.logo} alt={tenant.name} className="h-full w-full object-contain p-0.5" />
+                ) : (
+                  <span className="text-xl">{tenant.logo || '✨'}</span>
+                )}
+              </div>
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-slate-800">{tenant.name}</div>
                 <div className="text-xs text-slate-500">{tenant.industry}</div>
@@ -132,7 +139,14 @@ export default function Shell({ active, setActive, children }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-60">
                   <DropdownMenuLabel className="text-xs">
-                    {tenant ? `${tenant.logo} ${tenant.name}` : roleLabel}
+                    {tenant ? (
+                      <span className="flex items-center gap-2">
+                        <TenantLogo logo={tenant.logo} name={tenant.name} size="h-5 w-5" textSize="text-sm" rounded="rounded" padding="p-0" />
+                        <span className="truncate">{tenant.name}</span>
+                      </span>
+                    ) : (
+                      roleLabel
+                    )}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {items.map((it) => {

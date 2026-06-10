@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Plus, Search, Power, PowerOff, Eye, Pencil } from 'lucide-react';
+import TenantLogo from '@/components/app/TenantLogo';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 dayjs.locale('es');
@@ -77,7 +78,7 @@ export default function TenantsList() {
                   <tr key={t.id} className="border-b border-slate-100">
                     <td className="py-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-xl">{t.logo}</span>
+                        <TenantLogo logo={t.logo} name={t.name} size="h-9 w-9" textSize="text-xl" bordered padding="p-1" />
                         <div>
                           <div className="font-semibold text-slate-800">{t.name}</div>
                           <div className="text-xs text-slate-500">{t.industry} · {t.email}</div>

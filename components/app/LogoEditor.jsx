@@ -91,14 +91,6 @@ export default function LogoEditor({ tenantId }) {
             )}
           </div>
         </div>
-
-        <div className="border-t pt-4">
-          <Label className="text-xs">O introduce una URL pública (o un emoji)</Label>
-          <div className="mt-1 flex gap-2">
-            <Input value={logoValue} onChange={(e) => setLogoValue(e.target.value)} placeholder="https://... o un emoji ✨" />
-            <Button onClick={saveUrl}>Guardar</Button>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );

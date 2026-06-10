@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 dayjs.locale('es');
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart } from 'recharts';
+import TenantLogo from '@/components/app/TenantLogo';
 
 function Stat({ icon: Icon, label, value, sub, color = 'indigo' }) {
   return (
@@ -99,7 +100,7 @@ export function SuperAdminDashboard() {
               return (
                 <div key={t.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{t.logo}</span>
+                    <TenantLogo logo={t.logo} name={t.name} size="h-10 w-10" textSize="text-2xl" bordered padding="p-1" />
                     <div>
                       <div className="font-semibold text-slate-800">{t.name}</div>
                       <div className="text-xs text-slate-500">{t.industry} · Plan {plan?.name}</div>

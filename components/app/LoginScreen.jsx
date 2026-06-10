@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Building2, UserRound, Calendar, Sparkles, ArrowRight, RefreshCw, Mail, LogIn, Download } from 'lucide-react';
+import TenantLogo from '@/components/app/TenantLogo';
 
 export default function LoginScreen() {
   const { tenants, employees, login, resetDemo } = useApp();
@@ -92,7 +93,7 @@ export default function LoginScreen() {
                     onClick={() => login({ role: 'tenant_admin', tenantId: t.id })}
                     className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white p-2.5 text-left transition hover:border-emerald-500 hover:bg-emerald-50">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">{t.logo}</span>
+                      <TenantLogo logo={t.logo} name={t.name} size="h-8 w-8" textSize="text-xl" bordered padding="p-0.5" />
                       <div>
                         <div className="text-sm font-semibold text-slate-800">{t.name}</div>
                         <div className="text-xs text-slate-500">{t.industry}</div>
