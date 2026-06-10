@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { STATUS_CONFIG, PAYMENT_STATUS } from '@/lib/mockData';
-import { CalendarClock, User, Briefcase, CreditCard, CheckCircle2, XCircle, Clock, UserX } from 'lucide-react';
+import { CalendarClock, User, Briefcase, CreditCard, CheckCircle2, XCircle, Clock, UserX, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AppointmentDetailDialog({ appointmentId, onOpenChange }) {
@@ -24,6 +24,13 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
   const setStatus = (status) => {
     appointmentsApi.update(a.id, { status });
     toast.success(`Cita marcada como ${STATUS_CONFIG[status].label}`);
+    onOpenChange(false);
+  };
+
+  const deleteAppt = () => {
+    if (!window.confirm('¿Seguro que quieres ELIMINAR esta reserva? Esta acción no se puede deshacer.')) return;
+    appointmentsApi.remove(a.id);
+    toast.success('Reserva eliminada');
     onOpenChange(false);
   };
 
@@ -54,7 +61,8 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
           {a.status !== 'confirmed' && <Button size="sm" variant="outline" onClick={() => setStatus('confirmed')}><CheckCircle2 className="mr-1 h-4 w-4" /> Confirmar</Button>}
           {a.status !== 'completed' && <Button size="sm" variant="outline" onClick={() => setStatus('completed')}><CheckCircle2 className="mr-1 h-4 w-4" /> Completada</Button>}
           {a.status !== 'no_show' && <Button size="sm" variant="outline" onClick={() => setStatus('no_show')}><UserX className="mr-1 h-4 w-4" /> No asistió</Button>}
-          {a.status !== 'cancelled' && <Button size="sm" variant="destructive" onClick={() => setStatus('cancelled')}><XCircle className="mr-1 h-4 w-4" /> Cancelar</Button>}
+          {a.status !== 'cancelled' && <Button size="sm" variant="outline" onClick={() => setStatus('cancelled')}><XCircle className="mr-1 h-4 w-4" /> Cancelar</Button>}
+          <Button size="sm" variant="destructive" onClick={deleteAppt} className="ml-auto"><Trash2 className="mr-1 h-4 w-4" /> Eliminar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

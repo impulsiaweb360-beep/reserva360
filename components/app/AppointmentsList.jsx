@@ -11,15 +11,23 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { STATUS_CONFIG, PAYMENT_STATUS } from '@/lib/mockData';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, Trash2 } from 'lucide-react';
 import AppointmentDetailDialog from './AppointmentDetailDialog';
+import { toast } from 'sonner';
 
 export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
-  const { byTenant, employees, clients, services } = useApp();
+  const { byTenant, employees, clients, services, appointmentsApi } = useApp();
   const all = byTenant('appointments', tenantId);
   const [status, setStatus] = useState('all');
   const [q, setQ] = useState('');
   const [detailId, setDetailId] = useState(null);
+
+  const handleDelete = (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm('¿Seguro que quieres ELIMINAR esta reserva? Esta acción no se puede deshacer.')) return;
+    appointmentsApi.remove(id);
+    toast.success('Reserva eliminada');
+  };
 
   let list = all;
   if (lockEmployeeId) list = list.filter((a) => a.employeeId === lockEmployeeId);
@@ -88,7 +96,10 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
                     <td><Badge variant="outline" className={cfg.color}>{cfg.label}</Badge></td>
                     <td><Badge variant="secondary" className={pay.color}>{pay.label} · {a.payment?.amount}€</Badge></td>
                     <td className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => setDetailId(a.id)}><Eye className="h-4 w-4" /></Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => setDetailId(a.id)} title="Ver detalle"><Eye className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={(e) => handleDelete(e, a.id)} title="Eliminar"><Trash2 className="h-4 w-4 text-rose-500" /></Button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -123,7 +134,12 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
                 </div>
                 <div className="mt-2 flex items-center justify-between">
                   <Badge variant="secondary" className={pay.color}>{pay.label} · {a.payment?.amount}€</Badge>
-                  <Eye className="h-4 w-4 text-slate-400" />
+                  <div className="flex items-center gap-1">
+                    <button onClick={(e) => handleDelete(e, a.id)} className="rounded p-1 hover:bg-rose-50" title="Eliminar">
+                      <Trash2 className="h-4 w-4 text-rose-500" />
+                    </button>
+                    <Eye className="h-4 w-4 text-slate-400" />
+                  </div>
                 </div>
               </button>
             );
