@@ -9,14 +9,22 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, CalendarClock } from 'lucide-react';
 import { toast } from 'sonner';
+import EmployeeScheduleDialog from '@/components/app/EmployeeScheduleDialog';
 
 export default function EmployeesList({ tenantId }) {
   const { byTenant, employeesApi, appointments } = useApp();
   const employees = byTenant('employees', tenantId);
   const [editing, setEditing] = useState(null);
   const [open, setOpen] = useState(false);
+  const [scheduleEmployee, setScheduleEmployee] = useState(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+
+  const openSchedule = (emp) => {
+    setScheduleEmployee(emp);
+    setScheduleOpen(true);
+  };
 
   const startNew = () => { setEditing({ firstName: '', lastName: '', email: '', phone: '', specialty: '', color: '#6366f1', active: true }); setOpen(true); };
   const startEdit = (e) => { setEditing({ ...e }); setOpen(true); };
@@ -63,11 +71,25 @@ export default function EmployeesList({ tenantId }) {
                   <div>{e.email}</div>
                   <div>{e.phone}</div>
                 </div>
+                <div className="mt-2">
+                  {(!e.schedule || Object.keys(e.schedule || {}).length === 0) ? (
+                    <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-[10px] text-indigo-700">
+                      Horario del negocio
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-[10px] text-emerald-700">
+                      Horario personalizado
+                    </Badge>
+                  )}
+                </div>
                 <div className="mt-3 flex items-center justify-between">
                   <Badge variant="secondary">{count} citas</Badge>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => startEdit(e)}><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => remove(e.id)}><Trash2 className="h-4 w-4 text-rose-500" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => openSchedule(e)} title="Editar horario">
+                      <CalendarClock className="h-4 w-4 text-indigo-600" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => startEdit(e)} title="Editar empleado"><Pencil className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => remove(e.id)} title="Eliminar"><Trash2 className="h-4 w-4 text-rose-500" /></Button>
                   </div>
                 </div>
               </div>
@@ -98,6 +120,13 @@ export default function EmployeesList({ tenantId }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <EmployeeScheduleDialog
+        key={scheduleEmployee?.id || 'no-emp'}
+        open={scheduleOpen}
+        onOpenChange={setScheduleOpen}
+        employee={scheduleEmployee}
+      />
     </Card>
   );
 }
