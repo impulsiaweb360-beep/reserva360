@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { STATUS_CONFIG, PAYMENT_STATUS } from '@/lib/mockData';
-import { CalendarClock, User, Briefcase, CreditCard, CheckCircle2, XCircle, Clock, UserX, Trash2 } from 'lucide-react';
+import { CalendarClock, User, Briefcase, CreditCard, CheckCircle2, XCircle, Clock, UserX, Trash2, Euro } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AppointmentDetailDialog({ appointmentId, onOpenChange }) {
@@ -21,10 +21,38 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
   const cfg = STATUS_CONFIG[a.status];
   const pay = PAYMENT_STATUS[a.payment?.status];
   const amount = a.payment?.amount ?? svc?.price ?? 0;
+  const isPaid = a.payment?.status === 'paid';
 
   const setStatus = (status) => {
-    appointmentsApi.update(a.id, { status });
-    toast.success(`Cita marcada como ${STATUS_CONFIG[status].label}`);
+    // Si se marca como completada, también marcamos el pago como pagado
+    const patch = { status };
+    if (status === 'completed' && a.payment?.status !== 'paid') {
+      patch.payment = {
+        ...(a.payment || {}),
+        status: 'paid',
+        amount: a.payment?.amount ?? svc?.price ?? 0,
+        method: a.payment?.method || 'onsite',
+      };
+    }
+    appointmentsApi.update(a.id, patch);
+    if (status === 'completed' && a.payment?.status !== 'paid') {
+      toast.success(`Cita completada y marcada como pagada (${amount}€)`);
+    } else {
+      toast.success(`Cita marcada como ${STATUS_CONFIG[status].label}`);
+    }
+    onOpenChange(false);
+  };
+
+  const markPaid = () => {
+    appointmentsApi.update(a.id, {
+      payment: {
+        ...(a.payment || {}),
+        status: 'paid',
+        amount: a.payment?.amount ?? svc?.price ?? 0,
+        method: a.payment?.method || 'onsite',
+      },
+    });
+    toast.success(`Pago registrado: ${amount}€`);
     onOpenChange(false);
   };
 
@@ -61,6 +89,7 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
         <DialogFooter className="flex-wrap gap-2 sm:justify-start">
           {a.status !== 'confirmed' && <Button size="sm" variant="outline" onClick={() => setStatus('confirmed')}><CheckCircle2 className="mr-1 h-4 w-4" /> Confirmar</Button>}
           {a.status !== 'completed' && <Button size="sm" variant="outline" onClick={() => setStatus('completed')}><CheckCircle2 className="mr-1 h-4 w-4" /> Completada</Button>}
+          {!isPaid && <Button size="sm" variant="outline" onClick={markPaid} className="border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"><Euro className="mr-1 h-4 w-4" /> Marcar pagada</Button>}
           {a.status !== 'no_show' && <Button size="sm" variant="outline" onClick={() => setStatus('no_show')}><UserX className="mr-1 h-4 w-4" /> No asistió</Button>}
           {a.status !== 'cancelled' && <Button size="sm" variant="outline" onClick={() => setStatus('cancelled')}><XCircle className="mr-1 h-4 w-4" /> Cancelar</Button>}
           <Button size="sm" variant="destructive" onClick={deleteAppt} className="ml-auto"><Trash2 className="mr-1 h-4 w-4" /> Eliminar</Button>
