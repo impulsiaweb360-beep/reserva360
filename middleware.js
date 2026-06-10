@@ -44,5 +44,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo-reserva360.png|reserva360-supabase-schema.sql|book/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo-reserva360.png|reserva360-supabase-schema.sql|reserva360-storage-policies.sql|book/|manage/|api/public/|api/cron/).*)'],
 };

@@ -168,6 +168,15 @@ export default function BookPage() {
         start: slot.start,
       });
       setStep(6);
+
+      // Enviar email de confirmación con link manage/
+      try {
+        await fetch('/api/public/send-confirmation', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ appointment_id: newId }),
+        });
+      } catch (e) { console.error('email confirmation failed', e); }
     } catch (e) {
       setSubmitError(String(e?.message || e));
     } finally {
