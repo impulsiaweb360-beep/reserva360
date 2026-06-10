@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { getAvailableSlots, getWorkingWindows } from '@/lib/booking';
 import { Card, CardContent } from '@/components/ui/card';

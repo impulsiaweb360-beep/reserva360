@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import { Plus, Search, Power, PowerOff, Eye, Pencil } from 'lucide-react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 import { toast } from 'sonner';
 
 export default function TenantsList() {

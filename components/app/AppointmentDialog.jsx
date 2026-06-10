@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 import { useApp } from '@/lib/supabase-store';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';

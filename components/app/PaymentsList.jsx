@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { CreditCard, TrendingUp, Clock, AlertCircle } from 'lucide-react';
 import { PAYMENT_STATUS } from '@/lib/mockData';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 
 export default function PaymentsList({ tenantId }) {
   const { byTenant, clients, services } = useApp();

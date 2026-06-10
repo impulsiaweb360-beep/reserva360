@@ -2,6 +2,8 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 import { useApp } from '@/lib/supabase-store';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

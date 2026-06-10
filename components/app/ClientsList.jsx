@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Mail, Phone, Pencil, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+dayjs.locale('es');
 import { toast } from 'sonner';
 
 export default function ClientsList({ tenantId }) {
