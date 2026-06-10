@@ -69,7 +69,6 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="#features" className="hover:text-slate-900">Funciones</a>
             <a href="#industries" className="hover:text-slate-900">Para quién</a>
-            <a href="#pricing" className="hover:text-slate-900">Precios</a>
             <a href="#faq" className="hover:text-slate-900">Preguntas</a>
           </nav>
           <div className="flex items-start gap-3">
@@ -101,9 +100,6 @@ export default function LandingPage() {
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button size="lg" asChild className="gap-2 text-base shadow-lg">
               <Link href="/auth/signup">Empezar gratis 14 días <ArrowRight className="h-4 w-4" /></Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="text-base">
-              <a href="#pricing">Ver precios</a>
             </Button>
           </div>
           <p className="mt-4 text-xs text-slate-500">Sin tarjeta de crédito · Cancela cuando quieras</p>
@@ -207,43 +203,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* PRICING */}
-      <section id="pricing" className="bg-slate-50 py-20">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-4">Precios</Badge>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Planes para cada tamaño de negocio</h2>
-            <p className="mt-4 text-slate-600">Empieza gratis. Paga solo cuando tu negocio crezca.</p>
-          </div>
-          <div className="mt-14 mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
-            {PLANS.filter((p) => !p.hidden).map((p) => (
-              <Card key={p.name} className={p.popular ? 'border-2 border-indigo-500 shadow-2xl md:scale-105' : 'border-slate-200'}>
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold">{p.name}</h3>
-                    {p.popular && <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100">Más popular</Badge>}
-                  </div>
-                  <p className="mt-2 text-sm text-slate-600">{p.desc}</p>
-                  <div className="mt-6 flex items-baseline gap-1">
-                    <span className="text-5xl font-bold tracking-tight">{p.price}€</span>
-                    <span className="text-slate-500">/mes</span>
-                  </div>
-                  <Button asChild className="mt-6 w-full" variant={p.popular ? 'default' : 'outline'}>
-                    <Link href="/auth/signup">Empezar gratis</Link>
-                  </Button>
-                  <ul className="mt-8 space-y-3 text-sm">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500 shrink-0" /> {f}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <p className="mt-8 text-center text-sm text-slate-500">Todos los planes incluyen 14 días de prueba gratis · Cambia o cancela cuando quieras</p>
-        </div>
-      </section>
-
       {/* TESTIMONIAL */}
       <section className="py-20">
         <div className="container mx-auto px-6">
@@ -312,7 +271,6 @@ export default function LandingPage() {
             <h4 className="font-semibold text-slate-900">Producto</h4>
             <ul className="mt-3 space-y-2 text-sm text-slate-600">
               <li><a href="#features" className="hover:text-slate-900">Funciones</a></li>
-              <li><a href="#pricing" className="hover:text-slate-900">Precios</a></li>
               <li><a href="#industries" className="hover:text-slate-900">Para quién</a></li>
             </ul>
           </div>
