@@ -12,7 +12,7 @@ import { CalendarClock, User, Briefcase, CreditCard, CheckCircle2, XCircle, Cloc
 import { toast } from 'sonner';
 
 export default function AppointmentDetailDialog({ appointmentId, onOpenChange }) {
-  const { appointments, clients, services, employees, appointmentsApi } = useApp();
+  const { appointments, clients, services, employees, appointmentsApi, refresh } = useApp();
   const a = appointments.find((x) => x.id === appointmentId);
   if (!a) return null;
   const cli = clients.find((c) => c.id === a.clientId);
@@ -23,9 +23,9 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
   const amount = a.payment?.amount ?? svc?.price ?? 0;
   const isPaid = a.payment?.status === 'paid';
 
-  const setStatus = (status) => {
-    // Si se marca como completada, también marcamos el pago como pagado
+  const setStatus = async (status) => {
     const patch = { status };
+    // Si se marca como completada, también marcamos el pago como pagado
     if (status === 'completed' && a.payment?.status !== 'paid') {
       patch.payment = {
         ...(a.payment || {}),
@@ -34,26 +34,36 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
         method: a.payment?.method || 'onsite',
       };
     }
-    appointmentsApi.update(a.id, patch);
-    if (status === 'completed' && a.payment?.status !== 'paid') {
-      toast.success(`Cita completada y marcada como pagada (${amount}€)`);
-    } else {
-      toast.success(`Cita marcada como ${STATUS_CONFIG[status].label}`);
+    try {
+      await appointmentsApi.update(a.id, patch);
+      if (refresh) await refresh();
+      if (status === 'completed' && a.payment?.status !== 'paid') {
+        toast.success(`Cita completada y marcada como pagada (${amount}€)`);
+      } else {
+        toast.success(`Cita marcada como ${STATUS_CONFIG[status].label}`);
+      }
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(`Error al actualizar: ${err?.message || 'desconocido'}`);
     }
-    onOpenChange(false);
   };
 
-  const markPaid = () => {
-    appointmentsApi.update(a.id, {
-      payment: {
-        ...(a.payment || {}),
-        status: 'paid',
-        amount: a.payment?.amount ?? svc?.price ?? 0,
-        method: a.payment?.method || 'onsite',
-      },
-    });
-    toast.success(`Pago registrado: ${amount}€`);
-    onOpenChange(false);
+  const markPaid = async () => {
+    try {
+      await appointmentsApi.update(a.id, {
+        payment: {
+          ...(a.payment || {}),
+          status: 'paid',
+          amount: a.payment?.amount ?? svc?.price ?? 0,
+          method: a.payment?.method || 'onsite',
+        },
+      });
+      if (refresh) await refresh();
+      toast.success(`Pago registrado: ${amount}€`);
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(`Error al registrar pago: ${err?.message || 'desconocido'}`);
+    }
   };
 
   const deleteAppt = () => {

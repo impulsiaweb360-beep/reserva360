@@ -26,7 +26,13 @@ export async function POST(request) {
     const to = a.client?.email;
     if (!to) return NextResponse.json({ skipped: 'no email' });
 
-    const base = process.env.NEXT_PUBLIC_BASE_URL || '';
+    // Construir base URL: prioridad env > headers de la request (para producción/preview)
+    let base = process.env.NEXT_PUBLIC_BASE_URL || '';
+    if (!base) {
+      const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+      const proto = request.headers.get('x-forwarded-proto') || 'https';
+      if (host) base = `${proto}://${host}`;
+    }
     const manageUrl = `${base}/manage/${a.id}`;
     const when = new Date(a.start_at).toLocaleString('es-ES', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
