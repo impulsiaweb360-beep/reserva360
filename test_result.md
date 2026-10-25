@@ -188,8 +188,36 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ VERIFIED: Availability endpoint working correctly. Returns busy slots for specified date and optional employee_id. Tested with empty state (no appointments) and with bookings. Correctly filters by tenant slug, date range, and employee. Returns proper JSON format with busy array containing employee_id, start, and end times."
+  - task: "Customer self-management reschedule/cancel API /api/public/appointment/[id]"
+    implemented: true
+    working: true
+    file: "app/api/public/appointment/[id]/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported: reschedule from email link allowed booking outside business hours; 'modificar cita' link did nothing."
+      - working: "NA"
+        agent: "main"
+        comment: "POST {action:'reschedule', start_at, tz_offset} now validates: valid date, not in past, status not cancelled/completed/no_show, within tenant business_hours + employee schedule (in LOCAL time using tz_offset = browser getTimezoneOffset, fallback Europe/Madrid), rejects business break (14:00-15:00), vacations, and overlaps with other non-cancelled appts of same employee (409). POST {action:'cancel'} sets status cancelled. GET returns appt with tenant (slug, business_hours), employee (schedule), service. Confirmation email Modify link now ends with ?action=reschedule which auto-opens the slot picker."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Comprehensive testing of customer self-management API completed with 27/27 tests passing. Tested: (1) GET returns 200 with correct data structure (tenant.slug, business_hours, employee.schedule, service.duration_minutes), GET random uuid returns 404 ✓ (2) POST reschedule validates business hours correctly - rejects before/after hours, closed days (Sunday), Saturday hours (10:00-14:00) ✓ (3) Break time validation working - rejects 14:00-15:00 break period for customers ✓ (4) Timezone handling correct - 09:00 Madrid local time accepted, fallback to Madrid timezone working ✓ (5) Input validation - rejects past dates, invalid/missing start_at ✓ (6) Overlap detection working - returns 409 for conflicting appointments, excludes own appointment ✓ (7) Employee schedule override working - respects employee-specific hours over business hours ✓ (8) Availability endpoint returns busy array correctly ✓ (9) Cancel action sets status to 'cancelled', prevents further modifications ✓ (10) Unknown action returns 400 ✓ (11) Frontend pages /manage/[id] and /manage/[id]?action=reschedule return 200 ✓ All business logic, timezone conversions, validation rules, and error handling working correctly."
 
 frontend:
+  - task: "Customer manage page /manage/[id] with slot picker"
+    implemented: true
+    working: "NA"
+    file: "app/manage/[id]/page.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Rewritten: 30-day chip picker + slot grid computed with lib/booking getAvailableSlots (business hours, employee schedule, breaks, busy from /api/public/[slug]/availability?employee_id=). Own appointment excluded from busy. ?action=reschedule opens picker. Past/completed appts not modifiable. data-testids: manage-open-reschedule, manage-cancel, manage-day-YYYY-MM-DD, manage-slot-HH:mm, manage-confirm-reschedule, manage-no-slots."
   - task: "Marketing landing at /"
     implemented: true
     working: true
@@ -204,14 +232,14 @@ frontend:
 
 metadata:
   created_by: main_agent
-  version: "2.2"
-  test_sequence: 3
+  version: "2.3"
+  test_sequence: 4
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Dashboard bootstrap + tenant auto-creation"
-    - "Supabase queries from dashboard with RLS"
+    - "Customer self-management reschedule/cancel API /api/public/appointment/[id]"
+    - "Customer manage page /manage/[id] with slot picker"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -281,3 +309,49 @@ agent_communication:
       - Booking page integration
       
       NO CRITICAL ISSUES FOUND. Public booking flow ready for production.
+
+  - agent: testing
+    message: |
+      ✅ CUSTOMER SELF-MANAGEMENT API TESTING COMPLETE - ALL TESTS PASSED (27/27)
+      
+      Comprehensive testing of GET/POST /api/public/appointment/[id] completed successfully:
+      
+      VERIFIED WORKING:
+      1. GET endpoint returns 200 with complete data structure (tenant.slug, business_hours, employee.schedule, service.duration_minutes)
+      2. GET random UUID returns 404 (proper error handling)
+      3. POST reschedule validates business hours correctly:
+         - Rejects before opening (08:00) and after closing (18:30 ends 19:30)
+         - Rejects closed days (Sunday)
+         - Validates Saturday hours (10:00-14:00) - accepts 10:00, rejects 13:30 (ends 14:30)
+      4. Break time validation working:
+         - Rejects appointments during break (14:00-15:00)
+         - Rejects appointments overlapping break (13:30 ends 14:30)
+         - Accepts appointments after break (15:00)
+      5. Timezone handling correct:
+         - 09:00 Madrid local time (08:00 UTC in winter) accepted
+         - Fallback to Europe/Madrid timezone working when tz_offset not provided
+      6. Input validation working:
+         - Rejects past dates with proper error message
+         - Rejects invalid start_at format
+         - Rejects missing start_at
+      7. Overlap detection working:
+         - Returns 409 for conflicting appointments
+         - Correctly excludes own appointment from overlap check
+      8. Employee schedule override working:
+         - Respects employee-specific hours over business hours
+         - Rejects days when employee doesn't work
+         - Validates appointment end time against employee schedule
+      9. Availability endpoint returns busy array with correct format
+      10. Cancel action sets status to 'cancelled' and prevents further modifications
+      11. Unknown action returns 400 with proper error
+      12. Frontend pages /manage/[id] and /manage/[id]?action=reschedule return 200
+      
+      ALL BUSINESS LOGIC VERIFIED:
+      - Timezone conversions (Madrid local ↔ UTC)
+      - Business hours validation (tenant + employee)
+      - Break time blocking for customers
+      - Overlap detection with proper exclusion
+      - Status-based modification prevention
+      - Input validation and error handling
+      
+      NO CRITICAL ISSUES FOUND. Customer self-management API ready for production.

@@ -58,7 +58,7 @@ export async function POST(request) {
         </div>
         <div style="margin:24px 16px;padding:16px;border:1px solid #e2e8f0;border-radius:12px;background:#fff">
           <p style="margin:0 0 12px;font-weight:600;color:#0f172a">¿Necesitas hacer cambios?</p>
-          <p style="margin:0 0 8px;font-size:14px"><strong>Modificar cita:</strong><br/><a href="${manageUrl}" style="color:#6366f1;word-break:break-all">${manageUrl}</a></p>
+          <p style="margin:0 0 8px;font-size:14px"><strong>Modificar cita:</strong><br/><a href="${manageUrl}?action=reschedule" style="color:#6366f1;word-break:break-all">${manageUrl}?action=reschedule</a></p>
           <p style="margin:0;font-size:14px"><strong>Cancelar cita:</strong><br/><a href="${manageUrl}" style="color:#dc2626;word-break:break-all">${manageUrl}</a></p>
         </div>
         <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:24px">Enviado por Reserva360 · Te enviaremos un recordatorio 24h antes</p>
