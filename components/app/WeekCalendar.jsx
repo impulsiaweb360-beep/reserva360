@@ -17,9 +17,12 @@ import { STATUS_CONFIG } from '@/lib/mockData';
 const HOURS = Array.from({ length: 12 }, (_, i) => 8 + i); // 08:00-19:00
 const HOUR_HEIGHT = 56; // px per hour
 
+// Lunes de la semana de una fecha (independiente del locale: lunes → domingo)
+const mondayOf = (d) => dayjs(d).startOf('day').subtract((dayjs(d).day() + 6) % 7, 'day');
+
 export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = false }) {
   const { appointments, employees, clients, services, byTenant } = useApp();
-  const [weekStart, setWeekStart] = useState(dayjs().startOf('week').add(1, 'day')); // Monday start
+  const [weekStart, setWeekStart] = useState(() => mondayOf(dayjs())); // Lunes
   const [filter, setFilter] = useState(employeeFilter || 'all');
   const [openCreate, setOpenCreate] = useState(false);
   const [createInit, setCreateInit] = useState(null);
@@ -83,7 +86,7 @@ export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = 
               <Button variant="outline" size="icon" onClick={() => setWeekStart(weekStart.subtract(1, 'week'))}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setWeekStart(dayjs().startOf('week').add(1, 'day'))}>Hoy</Button>
+              <Button variant="outline" size="sm" onClick={() => setWeekStart(mondayOf(dayjs()))}>Hoy</Button>
               <Button variant="outline" size="icon" onClick={() => setWeekStart(weekStart.add(1, 'week'))}>
                 <ChevronRight className="h-4 w-4" />
               </Button>

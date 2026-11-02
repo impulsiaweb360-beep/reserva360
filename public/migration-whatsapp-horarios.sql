@@ -80,4 +80,16 @@ revoke execute on function public.create_public_booking(
   text, uuid, uuid, timestamptz, text, text, text, text, text
 ) from anon, authenticated, public;
 
+-- 9) Calendario en tiempo real: las citas nuevas aparecen al instante en el panel
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (
+       select 1 from pg_publication_tables
+       where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'appointments'
+     ) then
+    alter publication supabase_realtime add table public.appointments;
+  end if;
+end $$;
+
 -- ✅ Listo.
