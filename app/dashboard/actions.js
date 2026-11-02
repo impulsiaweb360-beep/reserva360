@@ -27,7 +27,7 @@ async function notifyNewTenant({ tenant, ownerEmail, ownerFirstName, ownerLastNa
           <p style="margin:0 0 12px;font-weight:600;font-size:16px">${tenant.name}</p>
           <p style="margin:4px 0;color:#475569"><strong>Industria:</strong> ${tenant.industry || '—'}</p>
           <p style="margin:4px 0;color:#475569"><strong>Slug:</strong> <code>${tenant.slug}</code></p>
-          <p style="margin:4px 0;color:#475569"><strong>Plan:</strong> ${tenant.plan_id || 'plan_starter'}</p>
+          <p style="margin:4px 0;color:#475569"><strong>Plan:</strong> ${tenant.plan_id || 'plan_free'}</p>
           <p style="margin:4px 0;color:#475569"><strong>URL pública:</strong><br/><a href="${publicUrl}" style="color:#6366f1;word-break:break-all">${publicUrl}</a></p>
         </div>
         <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:16px">
@@ -101,22 +101,26 @@ export async function bootstrapUser() {
       0: { enabled: false },
     };
 
-    const { data: newTenant, error: tErr } = await admin
-      .from('tenants')
-      .insert({
-        slug,
-        name: businessName,
-        industry: meta.industry || '',
-        logo: '✨',
-        color: '#6366f1',
-        email: user.email,
-        plan_id: 'plan_starter',
-        status: 'active',
-        business_hours: businessHours,
-        vacations: [],
-      })
-      .select()
-      .single();
+    const tenantRow = {
+      slug,
+      name: businessName,
+      industry: meta.industry || '',
+      logo: '✨',
+      color: '#6366f1',
+      email: user.email,
+      plan_id: 'plan_free',
+      status: 'active',
+      business_hours: businessHours,
+      vacations: [],
+      // 14 días de Pro gratis; después pasa a Free si no se suscribe
+      trial_ends_at: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
+    };
+    let { data: newTenant, error: tErr } = await admin.from('tenants').insert(tenantRow).select().single();
+    if (tErr && /trial_ends_at|plan_free|foreign key/i.test(tErr.message)) {
+      // La migración de planes aún no se ha ejecutado: crear con el esquema anterior
+      const { trial_ends_at, ...legacy } = tenantRow;
+      ({ data: newTenant, error: tErr } = await admin.from('tenants').insert({ ...legacy, plan_id: 'plan_starter' }).select().single());
+    }
     if (tErr) return { error: tErr.message };
 
     await admin.from('profiles').update({ tenant_id: newTenant.id }).eq('id', user.id);

@@ -68,6 +68,11 @@ export default function BookPage() {
   const [slot, setSlot] = useState(null);
   const [client, setClient] = useState({ firstName: '', lastName: '', email: '', phone: '', notes: '' });
   const [paymentMethod, setPaymentMethod] = useState('onsite');
+  const [payCfg, setPayCfg] = useState(null);
+  useEffect(() => {
+    if (!slug) return;
+    fetch(`/api/public/${slug}/payments`).then((r) => (r.ok ? r.json() : null)).then(setPayCfg).catch(() => {});
+  }, [slug]);
   const [confirmedAppt, setConfirmedAppt] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -91,6 +96,7 @@ export default function BookPage() {
   const services = tenant?.services || [];
   const employees = tenant?.employees || [];
   const service = services.find((s) => s.id === serviceId);
+  const svcPay = payCfg?.enabled && service ? payCfg.services?.[service.id] : null;
 
   // Huecos libres calculados en SERVIDOR (zona horaria del negocio, horario, descansos, vacaciones y citas)
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -148,12 +154,18 @@ export default function BookPage() {
             phone: client.phone,
             notes: client.notes,
           },
+          pay_online: paymentMethod === 'stripe',
         }),
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
         setSubmitError(j.error || 'No se pudo crear la reserva');
         setSubmitting(false);
+        return;
+      }
+      if (j.checkout_url) {
+        // Pago online: Stripe confirma la cita y envía los avisos al volver
+        window.location.href = j.checkout_url;
         return;
       }
       const newId = j.id;
@@ -380,16 +392,30 @@ export default function BookPage() {
                 <div><Label className="text-xs">Notas (opcional)</Label><Textarea rows={2} value={client.notes} onChange={(e) => setClient({ ...client, notes: e.target.value })} /></div>
                 <div>
                   <Label className="text-xs">Método de pago</Label>
-                  <div className="mt-1 grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setPaymentMethod('onsite')} className={`rounded-lg border p-3 text-sm transition ${paymentMethod === 'onsite' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200'}`}>
-                      <div className="font-semibold">Pagar en el local</div>
-                      <div className="text-xs text-slate-500">Efectivo o tarjeta</div>
-                    </button>
-                    <button type="button" onClick={() => setPaymentMethod('stripe')} className={`rounded-lg border p-3 text-sm transition ${paymentMethod === 'stripe' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200'}`} disabled>
-                      <div className="font-semibold">Pagar ahora · {service.price}€</div>
-                      <div className="text-xs text-slate-500">Próximamente (Stripe)</div>
-                    </button>
-                  </div>
+                  {svcPay?.mode === 'deposit' || svcPay?.mode === 'full' ? (
+                    <div className="mt-1 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-900" data-testid="book-online-required">
+                      <div className="font-semibold">
+                        {svcPay.mode === 'deposit' ? `Señal de ${svcPay.amount}€ para confirmar` : `Pago online de ${svcPay.amount}€`}
+                      </div>
+                      <div className="text-xs">
+                        {svcPay.mode === 'deposit'
+                          ? `Pagarás la señal ahora con tarjeta y el resto (${Math.max(0, service.price - svcPay.amount)}€) en el local.`
+                          : 'Pagarás ahora con tarjeta de forma segura con Stripe.'}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-1 grid grid-cols-2 gap-2">
+                      <button type="button" onClick={() => setPaymentMethod('onsite')} className={`rounded-lg border p-3 text-sm transition ${paymentMethod === 'onsite' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200'}`}>
+                        <div className="font-semibold">Pagar en el local</div>
+                        <div className="text-xs text-slate-500">Efectivo o tarjeta</div>
+                      </button>
+                      <button type="button" data-testid="book-pay-online" onClick={() => setPaymentMethod('stripe')} disabled={svcPay?.mode !== 'optional'}
+                        className={`rounded-lg border p-3 text-sm transition disabled:opacity-50 ${paymentMethod === 'stripe' ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200'}`}>
+                        <div className="font-semibold">Pagar ahora · {service.price}€</div>
+                        <div className="text-xs text-slate-500">{svcPay?.mode === 'optional' ? 'Tarjeta (Stripe)' : 'No disponible'}</div>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

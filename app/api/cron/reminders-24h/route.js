@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { DEFAULT_TZ, addDaysStr, todayStr, localToUtc, formatWhenLong } from '@/lib/tz';
 import { getWhatsAppConfig, notifyAppointment } from '@/lib/whatsapp/notify';
 import { getBaseUrl } from '@/lib/base-url';
+import { planLimits } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +69,11 @@ export async function GET(request) {
 
   const results = [];
   for (const a of appts || []) {
+    // Recordatorios automáticos: solo planes Pro y Business (incluida la prueba)
+    if (!planLimits(a.tenant).reminders) {
+      results.push({ id: a.id, skipped: 'plan Free' });
+      continue;
+    }
     const email = a.client?.email;
     if (!email) {
       results.push({ id: a.id, skipped: 'no email' });

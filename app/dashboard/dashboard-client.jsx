@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import PlanBanner from '@/components/app/PlanBanner';
 import { SupabaseAppProvider, useApp } from '@/lib/supabase-store';
 import Shell from '@/components/app/Shell';
 import { SuperAdminDashboard, TenantDashboard } from '@/components/app/Dashboards';
@@ -26,6 +27,13 @@ function AppShellInner() {
   const { session, hydrated } = useApp();
   const [active, setActive] = useState(null);
 
+  // Al volver de Stripe (?billing=..., ?connect=..., ?view=settings) abrir Configuración
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get('view') === 'settings' || sp.get('billing') || sp.get('connect')) setActive('settings');
+  }, []);
+
   if (!hydrated) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
@@ -35,7 +43,12 @@ function AppShellInner() {
   }
 
   const current = active || DEFAULT_BY_ROLE[session.role] || 'dashboard';
-  return <Shell active={current} setActive={setActive}>{renderContent(current, session)}</Shell>;
+  return (
+    <Shell active={current} setActive={setActive}>
+      {session.role === 'tenant_admin' && <PlanBanner onUpgrade={() => setActive('settings')} />}
+      {renderContent(current, session)}
+    </Shell>
+  );
 }
 
 function renderContent(view, session) {

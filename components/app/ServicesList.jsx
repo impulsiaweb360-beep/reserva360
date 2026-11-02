@@ -11,10 +11,13 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Pencil, Trash2, Clock, Euro } from 'lucide-react';
 import { toast } from 'sonner';
+import { PAYMENT_MODES } from '@/lib/plans';
 
 export default function ServicesList({ tenantId }) {
   const { byTenant, servicesApi } = useApp();
   const services = byTenant('services', tenantId);
+  // Los campos de cobro online existen cuando la migración de planes se ha ejecutado
+  const paymentsReady = services.some((s) => s.paymentMode !== undefined);
   const [editing, setEditing] = useState(null);
   const [open, setOpen] = useState(false);
 
@@ -72,6 +75,24 @@ export default function ServicesList({ tenantId }) {
               <div className="grid grid-cols-3 gap-3">
                 <div><Label className="text-xs">Duración (min)</Label><Input type="number" value={editing.duration} onChange={(e) => setEditing({ ...editing, duration: e.target.value })} /></div>
                 <div><Label className="text-xs">Precio (€)</Label><Input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: e.target.value })} /></div>
+              </div>
+              {paymentsReady && (
+                <div className="space-y-2 rounded-lg border p-3">
+                  <Label className="text-xs">Cobro online (plan Business con Stripe conectado)</Label>
+                  <select
+                    data-testid="service-payment-mode"
+                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={editing.paymentMode || 'onsite'}
+                    onChange={(e) => setEditing({ ...editing, paymentMode: e.target.value })}
+                  >
+                    {Object.entries(PAYMENT_MODES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                  </select>
+                  {editing.paymentMode === 'deposit' && (
+                    <div><Label className="text-xs">Importe de la señal (€)</Label><Input type="number" min="1" value={editing.depositAmount || ''} onChange={(e) => setEditing({ ...editing, depositAmount: e.target.value })} /></div>
+                  )}
+                </div>
+              )}
+              <div className="hidden"></div>
                 <div><Label className="text-xs">Color</Label><Input type="color" value={editing.color} onChange={(e) => setEditing({ ...editing, color: e.target.value })} /></div>
               </div>
               <div className="flex items-center gap-2"><Switch checked={editing.active} onCheckedChange={(v) => setEditing({ ...editing, active: v })} /><span className="text-sm">Activo</span></div>

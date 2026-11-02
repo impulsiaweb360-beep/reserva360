@@ -5,6 +5,7 @@ import { getWhatsAppConfig } from '@/lib/whatsapp/notify';
 import { handleInbound } from '@/lib/whatsapp/bot';
 import { samePhone } from '@/lib/phone';
 import { getBaseUrl } from '@/lib/base-url';
+import { planLimits } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -40,7 +41,7 @@ export async function POST(request, { params }) {
       const msg = event.whatsappInboundMessage;
       if (msg && (!msg.to || samePhone(msg.to, cfg.phone))) {
         const { data: tenant } = await supabase.from('tenants').select('*').eq('id', tenantId).maybeSingle();
-        if (tenant && tenant.status === 'active') {
+        if (tenant && tenant.status === 'active' && planLimits(tenant).whatsapp) {
           await handleInbound({ supabase, tenant, cfg, msg, baseUrl: getBaseUrl(request) });
         }
       }

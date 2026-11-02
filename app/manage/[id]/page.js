@@ -53,8 +53,23 @@ export default function ManagePage() {
   // Si se llega desde el email con ?action=reschedule, abrir directamente el selector de horario
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const action = new URLSearchParams(window.location.search).get('action');
+    const sp = new URLSearchParams(window.location.search);
+    const action = sp.get('action');
     if (action === 'reschedule') setRescheduleOpen(true);
+    // Vuelta del pago online
+    if (sp.get('paid') === '1' && sp.get('session_id')) {
+      (async () => {
+        const r = await fetch(`/api/public/appointment/${id}/verify-payment?session_id=${encodeURIComponent(sp.get('session_id'))}`);
+        const j = await r.json().catch(() => ({}));
+        if (j.paid) setSuccess('¡Pago recibido! Tu cita está confirmada. Te hemos enviado la confirmación.');
+        else setErr('Estamos comprobando tu pago. Si ya has pagado, se confirmará en unos minutos.');
+        window.history.replaceState({}, '', `/manage/${id}`);
+        await load();
+      })();
+    } else if (sp.get('payment') === 'cancelled') {
+      setErr('El pago no se ha completado. La cita no está confirmada: si no pagas en unos minutos se liberará la hora.');
+    }
+    // eslint-disable-next-line
   }, []);
 
   // Próximos 30 días para elegir

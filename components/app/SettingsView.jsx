@@ -13,6 +13,7 @@ import { Mail, MessageCircle, Smartphone, Shield, KeyRound, Webhook } from 'luci
 import BusinessHoursEditor from './BusinessHoursEditor';
 import LogoEditor from './LogoEditor';
 import WhatsAppSettings from './WhatsAppSettings';
+import BillingSettings from './BillingSettings';
 
 export default function SettingsView({ tenantId }) {
   const { tenants, updateTenant, plans } = useApp();
@@ -41,22 +42,10 @@ export default function SettingsView({ tenantId }) {
             <Button onClick={save}>Guardar cambios</Button>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">Suscripción</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <div>
-                <div className="text-sm font-semibold">Plan {plan?.name}</div>
-                <div className="text-xs text-slate-500">{plan?.price}€/{plan?.interval}</div>
-              </div>
-              <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Activo</Badge>
-            </div>
-            <Button variant="outline" className="w-full">Cambiar de plan</Button>
-            <Button variant="outline" className="w-full">Gestionar facturación en Stripe</Button>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* Plan, suscripción y cobros con Stripe */}
+      <BillingSettings />
 
       {/* Logo del negocio */}
       <LogoEditor tenantId={tenantId} />

@@ -7,6 +7,7 @@ import {
   Mail, ArrowRight, Check, Sparkles, Clock, Stethoscope, Scissors, Heart,
   Dog, Salad, Dumbbell, Star, Building2,
 } from 'lucide-react';
+import { PLANS as SAAS_PLANS } from '@/lib/plans';
 
 const FEATURES = [
   { icon: Calendar, title: 'Calendario inteligente', desc: 'Vista semanal y diaria con detección automática de huecos libres y solapamientos.' },
@@ -68,6 +69,7 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="#features" className="hover:text-slate-900">Funciones</a>
             <a href="#industries" className="hover:text-slate-900">Para quién</a>
+            <a href="#pricing" className="hover:text-slate-900">Precios</a>
             <a href="#faq" className="hover:text-slate-900">Preguntas</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -223,6 +225,37 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ */}
+      <section id="pricing" className="py-20">
+        <div className="container mx-auto px-6">
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Planes sencillos, sin permanencia</h2>
+            <p className="mt-3 text-slate-600">Empieza con 14 días de Pro gratis. Después elige el plan que mejor te encaje.</p>
+          </div>
+          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
+            {SAAS_PLANS.map((p) => (
+              <div key={p.id} data-testid={`landing-plan-${p.key}`} className={`relative flex flex-col rounded-2xl border bg-white p-6 ${p.popular ? 'border-indigo-500 shadow-lg ring-1 ring-indigo-500' : 'border-slate-200'}`}>
+                {p.popular && <span className="absolute -top-3 left-6 rounded-full bg-indigo-600 px-3 py-0.5 text-xs font-semibold text-white">Más popular</span>}
+                <div className="text-lg font-bold">{p.name}</div>
+                <div className="text-sm text-slate-500">{p.tagline}</div>
+                <div className="my-4">
+                  <span className="text-4xl font-extrabold">{p.monthly ? p.monthly.toLocaleString('es-ES') : '0'} €</span>
+                  <span className="text-slate-500">/mes</span>
+                  {p.yearly > 0 && <div className="text-xs text-emerald-600">o {p.yearly} €/año</div>}
+                </div>
+                <ul className="mb-6 flex-1 space-y-2 text-sm">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />{f}</li>
+                  ))}
+                </ul>
+                <Button asChild variant={p.popular ? 'default' : 'outline'}>
+                  <Link href="/auth/signup">{p.key === 'free' ? 'Empezar gratis' : `Probar ${p.name} 14 días`}</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="faq" className="bg-slate-50 py-20">
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-2xl text-center">
