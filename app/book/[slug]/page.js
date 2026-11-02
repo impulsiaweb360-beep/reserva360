@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 dayjs.locale('es');
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { getAvailableSlots, getWorkingWindows } from '@/lib/booking';
+import { getWorkingWindows } from '@/lib/booking';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -66,7 +66,6 @@ export default function BookPage() {
   const [employeeId, setEmployeeId] = useState('any');
   const [date, setDate] = useState(dayjs().add(1, 'day').startOf('day'));
   const [slot, setSlot] = useState(null);
-  const [busy, setBusy] = useState([]);
   const [client, setClient] = useState({ firstName: '', lastName: '', email: '', phone: '', notes: '' });
   const [paymentMethod, setPaymentMethod] = useState('onsite');
   const [confirmedAppt, setConfirmedAppt] = useState(null);
@@ -93,43 +92,31 @@ export default function BookPage() {
   const employees = tenant?.employees || [];
   const service = services.find((s) => s.id === serviceId);
 
-  // Fetch busy slots when date or employee changes
+  // Huecos libres calculados en SERVIDOR (zona horaria del negocio, horario, descansos, vacaciones y citas)
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
   useEffect(() => {
-    if (!tenant || step < 4) return;
+    if (!tenant || step < 4 || !serviceId) return;
+    let cancelled = false;
     (async () => {
-      const params = new URLSearchParams({ date: date.format('YYYY-MM-DD') });
-      if (employeeId && employeeId !== 'any') params.set('employee_id', employeeId);
-      const r = await fetch(`/api/public/${slug}/availability?${params.toString()}`);
-      const j = await r.json();
-      setBusy((j.busy || []).map((b) => ({ ...b, employeeId: b.employee_id, status: 'confirmed' })));
+      setSlotsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          date: date.format('YYYY-MM-DD'),
+          service_id: serviceId,
+          employee_id: employeeId || 'any',
+        });
+        const r = await fetch(`/api/public/${slug}/slots?${params.toString()}`);
+        const j = await r.json();
+        if (!cancelled) setAvailableSlots(r.ok ? j.slots || [] : []);
+      } catch {
+        if (!cancelled) setAvailableSlots([]);
+      } finally {
+        if (!cancelled) setSlotsLoading(false);
+      }
     })();
-  }, [tenant, step, date, employeeId, slug]);
-
-  // Compute available slots
-  const availableSlots = useMemo(() => {
-    if (!service || !tenant) return [];
-    const empList = employeeId === 'any' ? employees : employees.filter((e) => e.id === employeeId);
-    const all = [];
-    const seen = new Set();
-    empList.forEach((emp) => {
-      // Convert busy to look like appointments expected by getAvailableSlots
-      const apptsForEmp = busy
-        .filter((b) => b.employee_id === emp.id)
-        .map((b) => ({
-          tenantId: tenant.id,
-          employeeId: emp.id,
-          status: 'confirmed',
-          start: b.start,
-          end: b.end,
-        }));
-      const slots = getAvailableSlots({ date: date.toDate(), service, employee: emp, tenant, appointments: apptsForEmp });
-      slots.forEach((s) => {
-        const key = s.label;
-        if (!seen.has(key)) { seen.add(key); all.push({ ...s, employeeId: emp.id }); }
-      });
-    });
-    return all.sort((a, b) => a.label.localeCompare(b.label));
-  }, [date, service, employeeId, employees, tenant, busy]);
+    return () => { cancelled = true; };
+  }, [tenant, step, date, employeeId, serviceId, slug]);
 
   const dayOptions = useMemo(() => Array.from({ length: 14 }, (_, i) => dayjs().startOf('day').add(i, 'day')), []);
   const hasSlotsOnDay = (d) => {
@@ -146,22 +133,30 @@ export default function BookPage() {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const { data: newId, error } = await supabase.rpc('create_public_booking', {
-        p_tenant_slug: slug,
-        p_service_id: service.id,
-        p_employee_id: slot.employeeId,
-        p_start: slot.start,
-        p_client_first_name: client.firstName,
-        p_client_last_name: client.lastName,
-        p_client_email: client.email,
-        p_client_phone: client.phone,
-        p_client_notes: client.notes,
+      const r = await fetch('/api/public/book', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          service_id: service.id,
+          employee_id: slot.employeeId,
+          start_at: slot.start,
+          client: {
+            firstName: client.firstName,
+            lastName: client.lastName,
+            email: client.email,
+            phone: client.phone,
+            notes: client.notes,
+          },
+        }),
       });
-      if (error) {
-        setSubmitError(error.message || 'No se pudo crear la reserva');
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setSubmitError(j.error || 'No se pudo crear la reserva');
         setSubmitting(false);
         return;
       }
+      const newId = j.id;
       setConfirmedAppt({
         id: newId,
         employeeId: slot.employeeId,
@@ -336,7 +331,9 @@ export default function BookPage() {
               <Button variant="ghost" size="sm" onClick={() => setStep(3)} className="mb-3 -ml-2 gap-1"><ArrowLeft className="h-4 w-4" /> Volver</Button>
               <h2 className="text-lg font-semibold">Elige una hora</h2>
               <p className="mb-4 text-sm text-slate-500">{dayjs(date).format('dddd D [de] MMMM YYYY')}</p>
-              {availableSlots.length === 0 ? (
+              {slotsLoading ? (
+                <div className="py-8 text-center text-sm text-slate-500">Cargando horas disponibles…</div>
+              ) : availableSlots.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-8 text-center text-sm text-slate-500">
                   No hay horas disponibles este día. Prueba con otra fecha.
                 </div>

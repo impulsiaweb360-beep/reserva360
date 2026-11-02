@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { DEFAULT_TZ, addDaysStr, todayStr, localToUtc, formatWhenLong } from '@/lib/tz';
+import { getWhatsAppConfig, notifyAppointment } from '@/lib/whatsapp/notify';
+import { getBaseUrl } from '@/lib/base-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,22 +42,23 @@ export async function GET(request) {
 
   const supabase = createSupabaseAdminClient();
 
-  // Ventana: citas entre 23h45m y 24h15m desde ahora, no canceladas, sin recordatorio enviado.
-  const now = new Date();
-  const lower = new Date(now.getTime() + (24 * 60 - 15) * 60 * 1000).toISOString();
-  const upper = new Date(now.getTime() + (24 * 60 + 15) * 60 * 1000).toISOString();
+  // Ventana: todas las citas de MAÑANA (hora local del negocio, Europa/Madrid por defecto).
+  // El cron de Vercel se ejecuta una vez al día, así que cubrimos el día completo siguiente.
+  const tomorrow = addDaysStr(todayStr(DEFAULT_TZ), 1);
+  const lower = localToUtc(tomorrow, 0, DEFAULT_TZ).toISOString();
+  const upper = localToUtc(addDaysStr(tomorrow, 1), 0, DEFAULT_TZ).toISOString();
 
   const { data: appts, error } = await supabase
     .from('appointments')
     .select(`
       id, start_at, status, reminder_24h_sent_at,
-      tenant:tenants(name, address),
+      tenant:tenants(*),
       employee:employees(first_name, last_name),
       client:clients(first_name, last_name, email),
       service:services(name)
     `)
     .gte('start_at', lower)
-    .lte('start_at', upper)
+    .lt('start_at', upper)
     .is('reminder_24h_sent_at', null)
     .in('status', ['pending', 'confirmed']);
 
@@ -69,10 +73,7 @@ export async function GET(request) {
       results.push({ id: a.id, skipped: 'no email' });
       continue;
     }
-    const when = new Date(a.start_at).toLocaleString('es-ES', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    const when = formatWhenLong(a.start_at, a.tenant?.timezone || DEFAULT_TZ);
     const payload = buildEmail({
       clientName: `${a.client?.first_name || ''} ${a.client?.last_name || ''}`.trim(),
       businessName: a.tenant?.name || 'tu negocio',
@@ -103,5 +104,35 @@ export async function GET(request) {
     }
   }
 
-  return NextResponse.json({ checked: appts?.length || 0, results });
+  // ---------- Recordatorios por WhatsApp (negocios con YCloud conectado) ----------
+  const whatsapp = [];
+  try {
+    const { data: wa, error: waErr } = await supabase
+      .from('appointments')
+      .select('id, tenant_id')
+      .gte('start_at', lower)
+      .lt('start_at', upper)
+      .is('whatsapp_reminder_sent_at', null)
+      .in('status', ['pending', 'confirmed']);
+    if (!waErr) {
+      const baseUrl = getBaseUrl(request);
+      const tenantCache = new Map();
+      for (const a of wa || []) {
+        if (!tenantCache.has(a.tenant_id)) tenantCache.set(a.tenant_id, await getWhatsAppConfig(supabase, a.tenant_id));
+        const cfg = tenantCache.get(a.tenant_id);
+        if (!cfg || cfg.notify_reminder === false) continue;
+        const r = await notifyAppointment(supabase, a.id, 'reminder', { baseUrl });
+        if (r?.customer?.ok) {
+          await supabase.from('appointments').update({ whatsapp_reminder_sent_at: new Date().toISOString() }).eq('id', a.id);
+        }
+        whatsapp.push({ id: a.id, ok: Boolean(r?.customer?.ok), error: r?.customer?.error || r?.skipped || null });
+      }
+    } else {
+      whatsapp.push({ skipped: 'Falta ejecutar la migración SQL de WhatsApp' });
+    }
+  } catch (e) {
+    whatsapp.push({ error: String(e?.message || e) });
+  }
+
+  return NextResponse.json({ checked: appts?.length || 0, results, whatsapp });
 }

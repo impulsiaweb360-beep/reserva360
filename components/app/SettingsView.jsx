@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { Mail, MessageCircle, Smartphone, Shield, KeyRound, Webhook } from 'lucide-react';
 import BusinessHoursEditor from './BusinessHoursEditor';
 import LogoEditor from './LogoEditor';
+import WhatsAppSettings from './WhatsAppSettings';
 
 export default function SettingsView({ tenantId }) {
   const { tenants, updateTenant, plans } = useApp();
@@ -62,6 +63,9 @@ export default function SettingsView({ tenantId }) {
 
       {/* Editor de horarios y vacaciones */}
       <BusinessHoursEditor tenantId={tenantId} />
+
+      {/* WhatsApp: bot de reservas y avisos (YCloud) */}
+      <WhatsAppSettings tenantId={tenantId} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="lg:col-span-2">

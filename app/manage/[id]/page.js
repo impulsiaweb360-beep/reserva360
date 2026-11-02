@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 dayjs.locale('es');
-import { getAvailableSlots } from '@/lib/booking';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +31,7 @@ export default function ManagePage() {
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [date, setDate] = useState(dayjs().startOf('day'));
   const [slot, setSlot] = useState(null);
-  const [busy, setBusy] = useState([]);
+  const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   const load = async () => {
@@ -64,74 +63,30 @@ export default function ManagePage() {
     []
   );
 
-  // Carga los slots ocupados cuando se cambia de día o se abre el modo reprogramar
+  // Huecos libres calculados en servidor (excluye la propia cita para poder moverla dentro del mismo día)
   useEffect(() => {
-    if (!rescheduleOpen || !appt?.tenant?.slug) return;
+    if (!rescheduleOpen || !appt?.tenant?.slug || !appt?.service_id) return;
+    let cancelled = false;
     (async () => {
       setLoadingSlots(true);
       setSlot(null);
-      const url = `/api/public/${appt.tenant.slug}/availability?date=${date.format('YYYY-MM-DD')}&employee_id=${appt.employee_id}`;
+      const params = new URLSearchParams({
+        date: date.format('YYYY-MM-DD'),
+        service_id: appt.service_id,
+        employee_id: appt.employee_id,
+        exclude: appt.id,
+      });
       try {
-        const r = await fetch(url);
-        if (r.ok) {
-          const j = await r.json();
-          setBusy(
-            (j.busy || [])
-              .filter((b) => !b.employee_id || b.employee_id === appt.employee_id)
-              .map((b) => ({ start: b.start, end: b.end }))
-          );
-        } else {
-          setBusy([]);
-        }
+        const r = await fetch(`/api/public/${appt.tenant.slug}/slots?${params.toString()}`);
+        const j = await r.json().catch(() => ({}));
+        if (!cancelled) setSlots(r.ok ? j.slots || [] : []);
       } catch {
-        setBusy([]);
+        if (!cancelled) setSlots([]);
       }
-      setLoadingSlots(false);
+      if (!cancelled) setLoadingSlots(false);
     })();
-  }, [rescheduleOpen, date, appt?.tenant?.slug, appt?.employee_id]);
-
-  // Construye tenant / employee / service con formato esperado por getAvailableSlots
-  const bookingContext = useMemo(() => {
-    if (!appt?.tenant) return null;
-    const tenant = {
-      id: appt.tenant_id,
-      businessHours: appt.tenant.business_hours,
-      vacations: appt.tenant.vacations,
-    };
-    const employee = {
-      id: appt.employee_id,
-      // Si tiene schedule propio, usarlo; si no, null (hereda de business hours)
-      schedule:
-        appt.employee?.schedule && Object.keys(appt.employee.schedule).length > 0
-          ? appt.employee.schedule
-          : null,
-    };
-    const service = { duration: appt.service?.duration_minutes || 60 };
-    // Excluir la propia cita de los busy slots (para que su propio horario esté libre)
-    const ownStart = new Date(appt.start_at).getTime();
-    const ownEnd = new Date(appt.end_at).getTime();
-    const otherBusy = busy.filter(
-      (b) => !(new Date(b.start).getTime() === ownStart && new Date(b.end).getTime() === ownEnd)
-    );
-    return { tenant, employee, service, otherBusy };
-  }, [appt, busy]);
-
-  const slots = useMemo(() => {
-    if (!bookingContext) return [];
-    return getAvailableSlots({
-      date: date.toDate(),
-      service: bookingContext.service,
-      tenant: bookingContext.tenant,
-      employee: bookingContext.employee,
-      appointments: bookingContext.otherBusy.map((b) => ({
-        tenantId: bookingContext.tenant.id,
-        employeeId: bookingContext.employee.id,
-        status: 'confirmed',
-        start: b.start,
-        end: b.end,
-      })),
-    });
-  }, [bookingContext, date]);
+    return () => { cancelled = true; };
+  }, [rescheduleOpen, date, appt?.tenant?.slug, appt?.employee_id, appt?.service_id, appt?.id]);
 
   const cancel = async () => {
     if (!window.confirm('¿Seguro que quieres CANCELAR tu cita?')) return;

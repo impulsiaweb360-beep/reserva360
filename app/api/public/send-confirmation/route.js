@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { DEFAULT_TZ, formatWhenLong } from '@/lib/tz';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -14,7 +15,7 @@ export async function POST(request) {
       .from('appointments')
       .select(`
         id, start_at, end_at, notes,
-        tenant:tenants(name, address, phone, email),
+        tenant:tenants(*),
         employee:employees(first_name, last_name),
         client:clients(first_name, last_name, email),
         service:services(name, duration_minutes, price)
@@ -34,10 +35,7 @@ export async function POST(request) {
       if (host) base = `${proto}://${host}`;
     }
     const manageUrl = `${base}/manage/${a.id}`;
-    const when = new Date(a.start_at).toLocaleString('es-ES', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    const when = formatWhenLong(a.start_at, a.tenant?.timezone || DEFAULT_TZ);
     const clientName = `${a.client?.first_name || ''} ${a.client?.last_name || ''}`.trim();
     const emp = `${a.employee?.first_name || ''} ${a.employee?.last_name || ''}`.trim();
 
