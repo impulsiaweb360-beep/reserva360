@@ -3,6 +3,7 @@ import { requireTenant, errorResponse } from '@/lib/route-helpers';
 import { getStripe } from '@/lib/stripe';
 import { ensurePrices } from '@/lib/billing-server';
 import { getBaseUrl } from '@/lib/base-url';
+import { LAUNCH_FREE_MODE } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,9 @@ export const dynamic = 'force-dynamic';
 export async function POST(request) {
   const a = await requireTenant(request, ['tenant_admin', 'super_admin']);
   if (a.error) return a.error;
+  if (LAUNCH_FREE_MODE) {
+    return NextResponse.json({ error: 'Durante el lanzamiento Reserva360 es gratis: las suscripciones de pago aún no están disponibles.' }, { status: 403 });
+  }
   try {
     const { plan, interval } = await request.json().catch(() => ({}));
     if (!['pro', 'business'].includes(plan) || !['month', 'year'].includes(interval)) {

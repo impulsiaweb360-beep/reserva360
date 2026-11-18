@@ -262,10 +262,9 @@ export default function Landing() {
                     <span className="text-slate-500">/mes</span>
                     {p.yearly > 0 && <span className="block text-xs text-emerald-600">o {p.yearly} €/año</span>}
                   </p>
-                  <ul className="mb-6 flex-1 space-y-2 text-sm">
+                  <ul className="flex-1 space-y-2 text-sm">
                     {p.features.map((f) => <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />{f}</li>)}
                   </ul>
-                  <PrimaryCta location={`pricing-${p.key}`} label="Empezar gratis" className="w-full !py-2.5 !text-sm" />
                 </div>
               ))}
             </div>

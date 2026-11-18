@@ -77,8 +77,17 @@ export default function BillingSettings() {
               <a className="font-semibold underline" href="/migration-planes-stripe.sql" target="_blank" rel="noreferrer">Descargar SQL</a>
             </div>
           )}
-          {!s.stripeConfigured && (
+          {!s.stripeConfigured && !s.launchFreeMode && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Los pagos con Stripe aún no están activados en la plataforma.</div>
+          )}
+          {s.launchFreeMode && !paid && (
+            <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800" data-testid="billing-launch-mode">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                <b>Gratis durante el lanzamiento.</b> Tienes todas las funciones del plan Pro sin pagar nada. Cuando abramos oficialmente,
+                te avisaremos con antelación y tendrás un 30 % de descuento durante tus 3 primeros meses.
+              </span>
+            </div>
           )}
           {s.onTrial && (
             <div className="flex items-center gap-2 rounded-lg bg-indigo-50 p-3 text-sm text-indigo-800">
@@ -108,6 +117,7 @@ export default function BillingSettings() {
             </div>
           </div>
 
+          {!s.launchFreeMode && (
           <div className="flex items-center justify-center gap-1 rounded-lg bg-slate-100 p-1 text-sm sm:w-fit">
             {[['month', 'Mensual'], ['year', 'Anual']].map(([k, l]) => (
               <button key={k} type="button" data-testid={`billing-interval-${k}`} onClick={() => setInterval_(k)}
@@ -116,10 +126,11 @@ export default function BillingSettings() {
               </button>
             ))}
           </div>
+          )}
 
           <div className="grid gap-4 lg:grid-cols-3">
             {PLANS.map((p) => {
-              const isCurrent = p.id === current && (p.key === 'free' ? !paid : paid || s.onTrial);
+              const isCurrent = p.id === current && (p.key === 'free' ? !paid : paid || s.onTrial || s.launchFreeMode);
               const price = interval === 'year' ? p.yearly : p.monthly;
               return (
                 <div key={p.id} data-testid={`plan-card-${p.key}`}
@@ -136,7 +147,11 @@ export default function BillingSettings() {
                       <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />{f}</li>
                     ))}
                   </ul>
-                  {p.key === 'free' ? (
+                  {s.launchFreeMode && !paid ? (
+                    <Button variant="outline" disabled data-testid={`plan-launch-${p.key}`}>
+                      {isCurrent ? 'Tu plan (gratis en el lanzamiento)' : 'Disponible tras el lanzamiento'}
+                    </Button>
+                  ) : p.key === 'free' ? (
                     <Button variant="outline" disabled>{isCurrent ? 'Plan actual' : 'Incluido al cancelar'}</Button>
                   ) : paid ? (
                     <Button variant={isCurrent ? 'outline' : 'default'} disabled={busy === 'portal' || !s.stripeConfigured}

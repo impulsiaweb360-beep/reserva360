@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle2, Clock, Euro, Calendar as CalIcon, User, ChevronRight, ArrowLeft, MapPin, Phone, Mail, Sparkles } from 'lucide-react';
+import { useInitialTenant } from './initial-tenant';
 
 // Normaliza tenant desde DB (snake_case) a estructura de UI (camelCase) que usan getAvailableSlots y getWorkingWindows
 function normalizeTenant(raw) {
@@ -56,9 +57,11 @@ export default function BookPage() {
   const params = useParams();
   const slug = params?.slug;
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  // Datos del negocio ya cargados en el servidor (SEO): la página se pinta completa desde el primer HTML
+  const initialData = useInitialTenant();
 
-  const [loading, setLoading] = useState(true);
-  const [tenant, setTenant] = useState(null);
+  const [loading, setLoading] = useState(!initialData);
+  const [tenant, setTenant] = useState(() => (initialData ? normalizeTenant(initialData) : null));
   const [notFound, setNotFound] = useState(false);
 
   const [step, setStep] = useState(1);
@@ -83,9 +86,9 @@ export default function BookPage() {
       const { data, error } = await supabase.rpc('get_public_tenant', { p_slug: slug });
       if (error) {
         console.error(error);
-        setNotFound(true);
+        if (!initialData) setNotFound(true);
       } else if (!data) {
-        setNotFound(true);
+        if (!initialData) setNotFound(true);
       } else {
         setTenant(normalizeTenant(data));
       }

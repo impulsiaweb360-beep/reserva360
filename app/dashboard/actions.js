@@ -1,6 +1,7 @@
 'use server';
 
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
+import { LAUNCH_FREE_MODE } from '@/lib/plans';
 import { Resend } from 'resend';
 
 const ADMIN_NOTIFY_EMAIL = 'reserva360.app@gmail.com';
@@ -112,8 +113,8 @@ export async function bootstrapUser() {
       status: 'active',
       business_hours: businessHours,
       vacations: [],
-      // 14 días de Pro gratis; después pasa a Free si no se suscribe
-      trial_ends_at: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
+      // Modo lanzamiento: sin prueba de 14 días (todos tienen Pro gratis). Fuera de él: 14 días de Pro gratis
+      trial_ends_at: LAUNCH_FREE_MODE ? null : new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
     };
     let { data: newTenant, error: tErr } = await admin.from('tenants').insert(tenantRow).select().single();
     if (tErr && /trial_ends_at|plan_free|foreign key/i.test(tErr.message)) {
