@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Check, ChevronRight, Activity, Scissors, Sparkles, PawPrint, Apple, Dumbbell, Stethoscope, CalendarDays, Smartphone, Users2 } from 'lucide-react';
+import { Check, ChevronRight, Activity, Scissors, Sparkles, PawPrint, Apple, Dumbbell, Stethoscope, CalendarDays, Smartphone, Users2, MessageCircle } from 'lucide-react';
 import MarketingHeader from '@/components/marketing/MarketingHeader';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import { PrimaryCta, SecondaryCta, CtaNote } from '@/components/marketing/CtaButtons';
@@ -93,6 +93,17 @@ export default function SectorPage({ params }) {
                   <p className="mt-2 text-sm leading-relaxed text-slate-600">{p.d}</p>
                 </div>
               ))}
+            </div>
+            <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 md:flex-row md:items-center" data-testid="sector-whatsapp">
+              <MessageCircle className="h-8 w-8 shrink-0 text-emerald-600" aria-hidden="true" />
+              <div>
+                <h3 className="font-semibold text-slate-900">Citas también desde el WhatsApp Business de tu negocio</h3>
+                <p className="mt-1 text-sm leading-relaxed text-slate-700">
+                  En el plan Pro conectas el número de WhatsApp Business de tu {s.name === 'Clínicas y consultas' ? 'clínica' : 'negocio'} y tus clientes
+                  pueden reservar, consultar, cambiar o cancelar sus citas con menús y botones. Además reciben la confirmación y el recordatorio por WhatsApp,
+                  y tú un aviso de cada reserva nueva.
+                </p>
+              </div>
             </div>
           </div>
         </section>

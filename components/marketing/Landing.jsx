@@ -20,7 +20,7 @@ const ICONS = { Activity, Scissors, Sparkles, PawPrint, Apple, Dumbbell, Stethos
 const PROBLEMS = [
   { icon: NotebookPen, t: 'Agenda de papel', d: 'Solo está en un sitio, no avisa a nadie y, si la comparten varias personas, las citas se cruzan.' },
   { icon: FileSpreadsheet, t: 'Hojas de Excel', d: 'No evitan los solapes, no envían recordatorios y el cliente no puede reservar solo.' },
-  { icon: MessagesSquare, t: 'Citas por WhatsApp', d: 'Cada cita es una conversación que contestas entre cliente y cliente.' },
+  { icon: MessagesSquare, t: 'Citas a mano por WhatsApp', d: 'Cada cita es una conversación que contestas tú, entre cliente y cliente.' },
   { icon: AlarmClockOff, t: 'Olvidos y huecos vacíos', d: 'Sin recordatorios, las citas se olvidan y nadie aprovecha el hueco que queda libre.' },
 ];
 
@@ -30,7 +30,7 @@ const FEATURES = [
   { icon: UserCog, t: 'Empleados y horarios', d: 'Horario propio por profesional, días libres y vacaciones bloqueadas.' },
   { icon: BellRing, t: 'Recordatorios automáticos', d: 'Confirmación al reservar y recordatorio 24 h antes por email, y por WhatsApp en el plan Pro.' },
   { icon: Users, t: 'Clientes y servicios', d: 'Fichas de clientes con notas y número de visitas, y un catálogo de servicios con duración y precio.' },
-  { icon: MessageCircle, t: 'Reservas por WhatsApp', d: 'En el plan Pro, un asistente con menús para reservar, ver, cambiar o cancelar citas.' },
+  { icon: MessageCircle, t: 'Citas por WhatsApp Business', d: 'Conecta el WhatsApp Business de tu negocio: tus clientes reservan, ven, cambian o cancelan sus citas con menús y botones (plan Pro).' },
   { icon: CreditCard, t: 'Pagos y señales', d: 'Marca cobros como pagados o, en el plan Business, cobra online con tu propia cuenta de Stripe.' },
   { icon: BarChart3, t: 'Métricas del negocio', d: 'Citas del día, de la semana y del mes, ingresos, clientes nuevos y servicios más reservados.' },
 ];
@@ -48,7 +48,7 @@ const FAQS = [
   { q: '¿Mis clientes tienen que descargar una aplicación?', a: 'No. Reservan desde el navegador del móvil o del ordenador con tu enlace, sin crear cuenta.' },
   { q: '¿Puedo gestionar a varios empleados?', a: 'Sí. Cada profesional tiene su horario, sus días libres y sus vacaciones. El plan Pro admite hasta 3 profesionales y el Business hasta 10.' },
   { q: '¿Los clientes pueden cancelar o cambiar su cita?', a: 'Sí. El email de confirmación incluye un enlace para cambiar o cancelar la cita, y el hueco se libera al momento.' },
-  { q: '¿Se pueden enviar recordatorios por WhatsApp?', a: 'Sí, en el plan Pro. Conectas el WhatsApp de tu negocio con una cuenta de YCloud y Reserva360 envía confirmaciones y recordatorios.' },
+  { q: '¿Puedo gestionar las citas con el WhatsApp Business de mi negocio?', a: 'Sí, en el plan Pro. Conectas el número de WhatsApp Business de tu negocio a través de YCloud, un proveedor oficial de la API de WhatsApp Business. Desde ese número tus clientes pueden reservar, consultar, cambiar o cancelar sus citas con un asistente de menús y botones. Reserva360 también les envía la confirmación, el recordatorio 24 horas antes y los avisos de cambios, y a ti te avisa de cada reserva nueva.' },
   { q: '¿Mis datos están separados de los de otros negocios?', a: 'Sí. Cada negocio solo puede ver y gestionar su propia información.' },
 ];
 
@@ -73,7 +73,7 @@ export default function Landing() {
               </h1>
               <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
                 Reserva360 reúne tu agenda, las reservas online, tus clientes y tu equipo en una sola plataforma. Tus clientes reservan
-                a cualquier hora y tú dejas atrás la agenda de papel, el Excel y las citas por WhatsApp.
+                a cualquier hora y tú dejas atrás la agenda de papel, el Excel y las citas apuntadas a mano desde WhatsApp.
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <PrimaryCta location="hero" />
@@ -133,6 +133,43 @@ export default function Landing() {
                   <p className="mt-2 text-sm text-slate-600">{d}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* WHATSAPP BUSINESS */}
+        <section id="whatsapp" aria-labelledby="whatsapp-titulo" className="scroll-mt-24 py-16 md:py-24">
+          <div className="container mx-auto grid items-center gap-10 px-4 md:px-6 lg:grid-cols-2">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" /> Plan Pro
+              </span>
+              <h2 id="whatsapp-titulo" className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">Gestiona las citas desde el WhatsApp Business de tu negocio</h2>
+              <p className="mt-4 text-slate-600">
+                Conecta el número de WhatsApp Business de tu negocio y deja que un asistente con menús y botones atienda las citas por ti,
+                con tus mismos servicios, profesionales y horarios. Todo queda en tu agenda de Reserva360.
+              </p>
+              <p className="mt-3 text-sm text-slate-500">
+                La conexión se hace con YCloud, un proveedor oficial de la API de WhatsApp Business, desde Configuración → WhatsApp.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 className="font-semibold">Tus clientes, desde WhatsApp</h3>
+                <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                  {['Reservan una cita nueva', 'Consultan sus próximas citas', 'Cambian el día o la hora', 'Cancelan si no pueden venir'].map((x) => (
+                    <li key={x} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />{x}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h3 className="font-semibold">Avisos automáticos</h3>
+                <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                  {['Confirmación al reservar', 'Recordatorio 24 horas antes', 'Aviso si la cita cambia o se cancela', 'Aviso al negocio de cada reserva nueva'].map((x) => (
+                    <li key={x} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />{x}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </section>
