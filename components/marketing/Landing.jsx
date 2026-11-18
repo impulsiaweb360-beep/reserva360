@@ -1,327 +1,314 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
-  Calendar, Users, CreditCard, Bell, BarChart3, Shield, Smartphone, Globe,
-  Mail, ArrowRight, Check, Sparkles, Clock, Stethoscope, Scissors, Heart,
-  Dog, Salad, Dumbbell, Star, Building2,
+  CalendarDays, Globe2, Users, UserCog, BellRing, BarChart3, MessageCircle, CreditCard,
+  NotebookPen, FileSpreadsheet, MessagesSquare, AlarmClockOff, Check, ShieldCheck, Clock3,
+  Activity, Scissors, Sparkles, PawPrint, Apple, Dumbbell, Stethoscope, ArrowRight,
 } from 'lucide-react';
-import { PLANS as SAAS_PLANS } from '@/lib/plans';
+import MarketingHeader from './MarketingHeader';
+import MarketingFooter from './MarketingFooter';
+import { PrimaryCta, SecondaryCta, CtaNote } from './CtaButtons';
+import { EarlyAccessCard } from './EarlyAccess';
+import { BrowserShot, PhoneShot } from './Screenshot';
+import Faq from './Faq';
+import JsonLd, { organizationLd, websiteLd, softwareLd, faqLd } from './JsonLd';
+import { PLANS } from '@/lib/plans';
+import { SECTORS } from '@/lib/marketing/sectors';
+import { EARLY_ACCESS } from '@/lib/site';
+
+const ICONS = { Activity, Scissors, Sparkles, PawPrint, Apple, Dumbbell, Stethoscope };
+
+const PROBLEMS = [
+  { icon: NotebookPen, t: 'Agenda de papel', d: 'Solo está en un sitio, no avisa a nadie y, si la comparten varias personas, las citas se cruzan.' },
+  { icon: FileSpreadsheet, t: 'Hojas de Excel', d: 'No evitan los solapes, no envían recordatorios y el cliente no puede reservar solo.' },
+  { icon: MessagesSquare, t: 'Citas por WhatsApp', d: 'Cada cita es una conversación que contestas entre cliente y cliente.' },
+  { icon: AlarmClockOff, t: 'Olvidos y huecos vacíos', d: 'Sin recordatorios, las citas se olvidan y nadie aprovecha el hueco que queda libre.' },
+];
 
 const FEATURES = [
-  { icon: Calendar, title: 'Calendario inteligente', desc: 'Vista semanal y diaria con detección automática de huecos libres y solapamientos.' },
-  { icon: Globe, title: 'Reservas online 24/7', desc: 'Tu propia URL pública para que tus clientes reserven cuando quieran. Sin descargas, sin apps.' },
-  { icon: Users, title: 'Multi-empleado', desc: 'Cada profesional con su agenda, horarios y vacaciones. Filtra por persona o ve todo el equipo.' },
-  { icon: Bell, title: 'Recordatorios automáticos', desc: 'Email 24h antes de cada cita. Reduce las ausencias.' },
-  { icon: BarChart3, title: 'Métricas en tiempo real', desc: 'Ingresos, servicios más reservados, empleados más ocupados. Decide con datos.' },
+  { icon: Globe2, t: 'Reservas online 24 h', d: 'Tu propia página de reservas. El cliente elige servicio, profesional, día y hora sin llamarte.' },
+  { icon: CalendarDays, t: 'Agenda sin solapes', d: 'Los huecos se calculan con tus horarios, pausas y la duración de cada servicio.' },
+  { icon: UserCog, t: 'Empleados y horarios', d: 'Horario propio por profesional, días libres y vacaciones bloqueadas.' },
+  { icon: BellRing, t: 'Recordatorios automáticos', d: 'Confirmación al reservar y recordatorio 24 h antes por email, y por WhatsApp en el plan Pro.' },
+  { icon: Users, t: 'Clientes y servicios', d: 'Fichas de clientes con notas y número de visitas, y un catálogo de servicios con duración y precio.' },
+  { icon: MessageCircle, t: 'Reservas por WhatsApp', d: 'En el plan Pro, un asistente con menús para reservar, ver, cambiar o cancelar citas.' },
+  { icon: CreditCard, t: 'Pagos y señales', d: 'Marca cobros como pagados o, en el plan Business, cobra online con tu propia cuenta de Stripe.' },
+  { icon: BarChart3, t: 'Métricas del negocio', d: 'Citas del día, de la semana y del mes, ingresos, clientes nuevos y servicios más reservados.' },
 ];
 
-const INDUSTRIES = [
-  { icon: Stethoscope, name: 'Fisioterapeutas', color: 'from-sky-500 to-blue-600' },
-  { icon: Scissors, name: 'Peluquerías', color: 'from-pink-500 to-rose-600' },
-  { icon: Heart, name: 'Centros estética', color: 'from-fuchsia-500 to-purple-600' },
-  { icon: Salad, name: 'Nutricionistas', color: 'from-lime-500 to-emerald-600' },
-  { icon: Dog, name: 'Veterinarios', color: 'from-emerald-500 to-teal-600' },
-  { icon: Scissors, name: 'Barberías', color: 'from-amber-500 to-orange-600' },
-  { icon: Dumbbell, name: 'Entrenadores personales', color: 'from-red-500 to-rose-600' },
-  { icon: Building2, name: 'Clínicas y consultas', color: 'from-indigo-500 to-violet-600' },
+const STEPS = [
+  { n: '1', t: 'Crea tu cuenta', d: 'Pon el nombre y el logo de tu negocio. Sin tarjeta.' },
+  { n: '2', t: 'Configura servicios y horarios', d: 'Añade tus servicios con su duración y precio, tu horario y el de tu equipo.' },
+  { n: '3', t: 'Comparte tu enlace', d: 'Ponlo en Google, Instagram, WhatsApp o en un código QR. Las reservas llegan solas a tu agenda.' },
 ];
 
-const PLANS = [
-  {
-    id: 'starter',
-    name: 'Starter', price: 19, popular: false, hidden: false,
-    desc: 'Para profesionales independientes que empiezan.',
-    features: ['1 empleado', '100 reservas/mes', 'Recordatorios por email', 'Página pública de reservas', 'Soporte por email'],
-  },
-  {
-    id: 'pro',
-    name: 'Pro', price: 39, popular: true, hidden: false,
-    desc: 'Para negocios en crecimiento que necesitan más potencia.',
-    features: ['Plan Starter +', 'Hasta 10 empleados', 'Reservas ilimitadas', 'Pagos online con Stripe', 'Métricas avanzadas', 'Soporte prioritario'],
-  },
-  {
-    id: 'business',
-    name: 'Business', price: 99, popular: false, hidden: true,
-    desc: 'Para clínicas y franquicias con varias sedes.',
-    features: ['Plan Pro +', 'Empleados ilimitados', 'Multi-sede', 'SMS + WhatsApp', 'API y Webhooks', 'Marca personalizada', 'Soporte dedicado'],
-  },
+const FAQS = [
+  { q: '¿Qué es Reserva360?', a: 'Es un software de gestión de citas y reservas online para negocios que trabajan con cita previa. Reúne en una sola plataforma la agenda, la página de reservas, los clientes, los empleados y los recordatorios.' },
+  { q: '¿Cuánto cuesta?', a: `Durante la fase de lanzamiento es gratis. Cuando abramos oficialmente, quienes se hayan registrado antes tendrán un ${EARLY_ACCESS.discount} de descuento durante ${EARLY_ACCESS.months} meses. Hay un plan Free (1 profesional, hasta 50 reservas al mes), Pro (19,99 €/mes) y Business (39,99 €/mes).` },
+  { q: '¿Necesito tarjeta para registrarme?', a: 'No. Creas tu cuenta con tu email y empiezas a usarlo.' },
+  { q: '¿Mis clientes tienen que descargar una aplicación?', a: 'No. Reservan desde el navegador del móvil o del ordenador con tu enlace, sin crear cuenta.' },
+  { q: '¿Puedo gestionar a varios empleados?', a: 'Sí. Cada profesional tiene su horario, sus días libres y sus vacaciones. El plan Pro admite hasta 3 profesionales y el Business hasta 10.' },
+  { q: '¿Los clientes pueden cancelar o cambiar su cita?', a: 'Sí. El email de confirmación incluye un enlace para cambiar o cancelar la cita, y el hueco se libera al momento.' },
+  { q: '¿Se pueden enviar recordatorios por WhatsApp?', a: 'Sí, en el plan Pro. Conectas el WhatsApp de tu negocio con una cuenta de YCloud y Reserva360 envía confirmaciones y recordatorios.' },
+  { q: '¿Mis datos están separados de los de otros negocios?', a: 'Sí. Cada negocio solo puede ver y gestionar su propia información.' },
 ];
 
-const FAQ = [
-  { q: '¿Puedo probarlo gratis?', a: 'Sí. Crea tu cuenta y prueba todas las funciones durante 14 días sin tarjeta de crédito.' },
-  { q: '¿Mis clientes necesitan instalar una app?', a: 'No. Tus clientes reservan desde tu URL pública (ej: reserva360.es/tu-negocio) directamente en su navegador.' },
-  { q: '¿Cómo funcionan los recordatorios?', a: 'Reserva360 envía automáticamente un email 24h antes de cada cita para reducir las ausencias.' },
-  { q: '¿Los datos están seguros?', a: 'Sí. Usamos Row Level Security para aislar los datos entre negocios y cifrado AES-256. Cumplimos GDPR.' },
-  { q: '¿Puedo cancelar cuando quiera?', a: 'Sí, sin permanencia. Cancelas desde tu panel y dejas de pagar al instante.' },
-];
-
-export default function LandingPage() {
+export default function Landing() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* HEADER */}
-      <header className="border-b border-slate-200/70 bg-white/80 backdrop-blur sticky top-0 z-40">
-        <div className="container mx-auto flex items-center justify-between gap-3 px-6 py-3">
-          <Link href="/" className="flex items-center">
-            <img src="/logo-reserva360.png" alt="Reserva360" className="h-9 w-auto" />
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <a href="#features" className="hover:text-slate-900">Funciones</a>
-            <a href="#industries" className="hover:text-slate-900">Para quién</a>
-            <a href="#pricing" className="hover:text-slate-900">Precios</a>
-            <a href="#faq" className="hover:text-slate-900">Preguntas</a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild className="gap-2">
-              <a href="mailto:reserva360.app@gmail.com?subject=Contacto%20Reserva360"><Mail className="h-4 w-4" /> Contacto</a>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/auth/login">Iniciar sesión</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white text-slate-900">
+      <JsonLd data={[organizationLd(), websiteLd(), softwareLd(PLANS), faqLd(FAQS)]} />
+      <MarketingHeader />
 
-      {/* HERO */}
-      <section className="bg-gradient-to-br from-slate-50 via-white to-indigo-50">
-        <div className="container mx-auto px-6 py-20 text-center">
-          <div className="mb-8 flex justify-center">
-            <img src="/logo-reserva360.png" alt="Reserva360" className="h-28 w-auto sm:h-36 md:h-44 lg:h-52 drop-shadow-sm" />
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl max-w-4xl mx-auto">
-            Gestione citas y reservas <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">para cualquier negocio</span>
-          </h1>
-          <p className="mt-6 text-lg text-slate-600 max-w-2xl mx-auto">
-            Fisios, peluquerías, veterinarios, barberías, nutricionistas… la plataforma todo-en-uno para gestionar agenda, clientes, empleados y pagos.
-          </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" asChild className="gap-2 text-base shadow-lg">
-              <Link href="/auth/signup">Empezar gratis 14 días <ArrowRight className="h-4 w-4" /></Link>
-            </Button>
-          </div>
-          <p className="mt-4 text-xs text-slate-500">Sin tarjeta de crédito · Cancela cuando quieras</p>
-        </div>
-      </section>
-
-      {/* SOCIAL PROOF / NUMBERS */}
-      <section className="border-y border-slate-100 bg-white py-10">
-        <div className="container mx-auto grid grid-cols-2 gap-6 px-6 md:grid-cols-4">
-          {[
-            { value: '+10.000', label: 'Citas gestionadas/mes' },
-            { value: '99.9%', label: 'Uptime garantizado' },
-            { value: '<30s', label: 'Crea tu cuenta' },
-            { value: '24/7', label: 'Reservas online' },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">{s.value}</div>
-              <div className="mt-1 text-sm text-slate-500">{s.label}</div>
+      <main id="contenido">
+        {/* HERO */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50/70 via-white to-white">
+          <div className="container mx-auto px-4 pb-16 pt-12 md:px-6 md:pb-24 md:pt-20">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" /> {EARLY_ACCESS.badge}: {EARLY_ACCESS.short.toLowerCase()}
+              </p>
+              <h1 className="mt-5 text-4xl font-extrabold tracking-tight md:text-6xl">
+                Software de gestión de citas y{' '}
+                <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">reservas online</span>{' '}
+                para tu negocio
+              </h1>
+              <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
+                Reserva360 reúne tu agenda, las reservas online, tus clientes y tu equipo en una sola plataforma. Tus clientes reservan
+                a cualquier hora y tú dejas atrás la agenda de papel, el Excel y las citas por WhatsApp.
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <PrimaryCta location="hero" />
+                <SecondaryCta location="hero" />
+              </div>
+              <CtaNote className="mt-4" />
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* FEATURES */}
-      <section id="features" className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-4">Funcionalidades</Badge>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Todo lo que necesitas para gestionar tu negocio</h2>
-            <p className="mt-4 text-slate-600">Reserva360 reemplaza tu agenda de papel, Excel y WhatsApp con una sola herramienta moderna.</p>
-          </div>
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map((f) => {
-              const Icon = f.icon;
-              return (
-                <Card key={f.title} className="border-slate-200 transition hover:border-indigo-300 hover:shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900">{f.title}</h3>
-                    <p className="mt-1 text-sm text-slate-600">{f.desc}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* INDUSTRIES */}
-      <section id="industries" className="bg-slate-50 py-20">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-4">Para quién</Badge>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Diseñado para negocios basados en agenda</h2>
-            <p className="mt-4 text-slate-600">Si tu negocio se basa en citas con clientes, Reserva360 es para ti.</p>
-          </div>
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-            {INDUSTRIES.map((i) => {
-              const Icon = i.icon;
-              return (
-                <div key={i.name} className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-1 hover:shadow-md">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${i.color} text-white shadow`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="font-semibold text-slate-800">{i.name}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-4">Cómo funciona</Badge>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">En 3 pasos estás funcionando</h2>
-          </div>
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {[
-              { n: '1', title: 'Crea tu cuenta', desc: 'Regístrate gratis en menos de 30 segundos con tu email.' },
-              { n: '2', title: 'Configura tu negocio', desc: 'Añade tus servicios, empleados y horarios. La app se adapta a ti.' },
-              { n: '3', title: 'Empieza a recibir reservas', desc: 'Comparte tu URL pública. Tus clientes reservan online 24/7.' },
-            ].map((s) => (
-              <div key={s.n} className="relative">
-                <div className="absolute -top-4 left-6 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-lg font-bold text-white shadow-lg">
-                  {s.n}
-                </div>
-                <Card className="border-slate-200 pt-6">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-slate-900">{s.title}</h3>
-                    <p className="mt-2 text-sm text-slate-600">{s.desc}</p>
-                  </CardContent>
-                </Card>
+            <div className="relative mx-auto mt-14 max-w-6xl">
+              <BrowserShot
+                name="panel-dashboard"
+                priority
+                alt="Panel de Reserva360 con las citas del día, de la semana y del mes, ingresos, reservas por día y servicios más reservados"
+              />
+              <div className="absolute -bottom-10 right-2 hidden w-44 md:block lg:-right-6 lg:w-52">
+                <PhoneShot name="reserva-movil-servicios" alt="Página de reservas de Reserva360 en el móvil: el cliente elige el servicio" />
               </div>
-            ))}
+            </div>
+            <p className="mt-14 text-center text-xs text-slate-400 md:mt-16">Capturas reales de Reserva360 con un negocio de demostración y datos ficticios.</p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* TESTIMONIAL */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <Card className="mx-auto max-w-3xl border-slate-200 bg-gradient-to-br from-white to-indigo-50">
-            <CardContent className="p-10 text-center">
-              <div className="mb-3 flex justify-center text-amber-500">
-                {[1,2,3,4,5].map((s) => <Star key={s} className="h-5 w-5 fill-current" />)}
-              </div>
-              <blockquote className="text-xl font-medium text-slate-800">
-                “Pasamos de gestionar las citas por WhatsApp y cuaderno a tener un sistema profesional. Las ausencias bajaron un 60% gracias a los recordatorios automáticos.”
-              </blockquote>
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white">LG</div>
-                <div className="text-left">
-                  <div className="font-semibold text-slate-900">Laura García</div>
-                  <div className="text-xs text-slate-500">Fisioterapeuta · Madrid</div>
+        {/* PROBLEMAS */}
+        <section aria-labelledby="problemas" className="py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 id="problemas" className="text-3xl font-bold tracking-tight md:text-4xl">¿Así gestionas tus citas hoy?</h2>
+              <p className="mt-3 text-slate-600">Funcionan… hasta que el negocio crece o el teléfono no para de sonar.</p>
+            </div>
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {PROBLEMS.map(({ icon: I, t, d }) => (
+                <div key={t} className="rounded-2xl border border-slate-200 bg-white p-6">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600"><I className="h-5 w-5" aria-hidden="true" /></div>
+                  <h3 className="mt-4 font-semibold">{t}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{d}</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="pricing" className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto mb-10 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Planes sencillos, sin permanencia</h2>
-            <p className="mt-3 text-slate-600">Empieza con 14 días de Pro gratis. Después elige el plan que mejor te encaje.</p>
+              ))}
+            </div>
+            <p className="mt-10 text-center text-lg font-medium text-slate-800">
+              Con Reserva360, todo queda en <span className="text-indigo-600">una sola agenda</span> que se actualiza sola.
+            </p>
           </div>
-          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-            {SAAS_PLANS.map((p) => (
-              <div key={p.id} data-testid={`landing-plan-${p.key}`} className={`relative flex flex-col rounded-2xl border bg-white p-6 ${p.popular ? 'border-indigo-500 shadow-lg ring-1 ring-indigo-500' : 'border-slate-200'}`}>
-                {p.popular && <span className="absolute -top-3 left-6 rounded-full bg-indigo-600 px-3 py-0.5 text-xs font-semibold text-white">Más popular</span>}
-                <div className="text-lg font-bold">{p.name}</div>
-                <div className="text-sm text-slate-500">{p.tagline}</div>
-                <div className="my-4">
-                  <span className="text-4xl font-extrabold">{p.monthly ? p.monthly.toLocaleString('es-ES') : '0'} €</span>
-                  <span className="text-slate-500">/mes</span>
-                  {p.yearly > 0 && <div className="text-xs text-emerald-600">o {p.yearly} €/año</div>}
+        </section>
+
+        {/* FUNCIONALIDADES */}
+        <section id="funcionalidades" aria-labelledby="funcionalidades-titulo" className="scroll-mt-24 bg-slate-50 py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 id="funcionalidades-titulo" className="text-3xl font-bold tracking-tight md:text-4xl">Todo lo que necesitas para gestionar tus reservas</h2>
+              <p className="mt-3 text-slate-600">Un programa de reservas online pensado para negocios con cita previa, sin complicaciones.</p>
+            </div>
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURES.map(({ icon: I, t, d }) => (
+                <div key={t} className="rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><I className="h-5 w-5" aria-hidden="true" /></div>
+                  <h3 className="mt-4 font-semibold">{t}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{d}</p>
                 </div>
-                <ul className="mb-6 flex-1 space-y-2 text-sm">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />{f}</li>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CÓMO FUNCIONA */}
+        <section id="como-funciona" aria-labelledby="como-funciona-titulo" className="scroll-mt-24 py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 id="como-funciona-titulo" className="text-3xl font-bold tracking-tight md:text-4xl">Empieza a recibir reservas en tres pasos</h2>
+              <p className="mt-3 text-slate-600">Sin instalaciones ni conocimientos técnicos.</p>
+            </div>
+            <ol className="mt-12 grid gap-6 md:grid-cols-3">
+              {STEPS.map((s) => (
+                <li key={s.n} className="relative rounded-2xl border border-slate-200 bg-white p-6">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-lg font-bold text-white">{s.n}</span>
+                  <h3 className="mt-4 text-lg font-semibold">{s.t}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{s.d}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* DEMOSTRACIÓN VISUAL */}
+        <section aria-labelledby="demo" className="bg-gradient-to-b from-slate-50 to-white py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 id="demo" className="text-3xl font-bold tracking-tight md:text-4xl">Así se ve Reserva360 por dentro</h2>
+              <p className="mt-3 text-slate-600">La agenda semanal para ti y una página de reservas sencilla para tus clientes.</p>
+            </div>
+            <div className="mt-12">
+              <h3 className="mb-4 text-lg font-semibold">Calendario semanal por profesional</h3>
+              <BrowserShot
+                name="panel-calendario-semanal"
+                alt="Calendario semanal de Reserva360 de lunes a domingo con las citas de una fisioterapeuta, cada una con su servicio y estado"
+              />
+            </div>
+            <div className="mt-16">
+              <h3 className="text-lg font-semibold">La reserva del cliente, desde el móvil</h3>
+              <p className="mt-1 text-sm text-slate-600">Elige el servicio, el profesional y el día. Solo ve horas que de verdad están libres.</p>
+              <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3">
+                {[
+                  ['reserva-movil-servicios', '1. Elige el servicio', 'Paso 1 de la reserva online: lista de servicios con duración y precio'],
+                  ['reserva-movil-profesional', '2. Elige profesional', 'Paso 2 de la reserva online: elegir profesional o el primero disponible'],
+                  ['reserva-movil-fecha', '3. Elige el día', 'Paso 3 de la reserva online: calendario con los días disponibles y los cerrados desactivados'],
+                ].map(([n, label, alt]) => (
+                  <figure key={n} className="mx-auto w-full max-w-[260px]">
+                    <PhoneShot name={n} alt={alt} />
+                    <figcaption className="mt-3 text-center text-sm font-medium text-slate-700">{label}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTORES */}
+        <section id="sectores" aria-labelledby="sectores-titulo" className="scroll-mt-24 py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 id="sectores-titulo" className="text-3xl font-bold tracking-tight md:text-4xl">Diseñado para negocios que trabajan con cita previa</h2>
+              <p className="mt-3 text-slate-600">Descubre cómo se adapta Reserva360 a tu sector.</p>
+            </div>
+            <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {SECTORS.map((s) => {
+                const I = ICONS[s.icon] || CalendarDays;
+                return (
+                  <li key={s.slug}>
+                    <Link href={`/${s.slug}`} className="group flex h-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-indigo-300 hover:shadow-md">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><I className="h-5 w-5" aria-hidden="true" /></span>
+                      <span>
+                        <span className="block font-semibold group-hover:text-indigo-700">{s.menuLabel}</span>
+                        <span className="text-xs text-slate-500">{s.keywords[0].charAt(0).toUpperCase() + s.keywords[0].slice(1)}</span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-6 text-center text-sm text-slate-500">¿Tu negocio no aparece? Si trabajas con citas, Reserva360 también te sirve.</p>
+          </div>
+        </section>
+
+        {/* BENEFICIOS */}
+        <section aria-labelledby="beneficios" className="bg-slate-50 py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 id="beneficios" className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight md:text-4xl">Ventajas para todo el equipo</h2>
+            <div className="mt-12 grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-8">
+                <div className="flex items-center gap-3"><ShieldCheck className="h-6 w-6 text-indigo-600" aria-hidden="true" /><h3 className="text-xl font-semibold">Para propietarios</h3></div>
+                <ul className="mt-5 space-y-3 text-sm text-slate-700">
+                  {['Menos tiempo al teléfono y en WhatsApp dando citas', 'Reservas también por la noche y en fin de semana', 'Una visión clara de la semana y de los ingresos', 'Horarios y vacaciones de todo el equipo en un solo sitio', 'Página de reservas con el nombre y el logo de tu negocio'].map((x) => (
+                    <li key={x} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />{x}</li>
                   ))}
                 </ul>
-                <Button asChild variant={p.popular ? 'default' : 'outline'}>
-                  <Link href="/auth/signup">{p.key === 'free' ? 'Empezar gratis' : `Probar ${p.name} 14 días`}</Link>
-                </Button>
               </div>
-            ))}
+              <div className="rounded-2xl border border-slate-200 bg-white p-8">
+                <div className="flex items-center gap-3"><Clock3 className="h-6 w-6 text-indigo-600" aria-hidden="true" /><h3 className="text-xl font-semibold">Para empleados</h3></div>
+                <ul className="mt-5 space-y-3 text-sm text-slate-700">
+                  {['Cada profesional con su propio horario y sus días libres', 'Sin citas en la pausa de mediodía ni en vacaciones', 'Sin dobles reservas a la misma hora', 'Menos interrupciones mientras atienden', 'Cambios y cancelaciones que el cliente hace solo'].map((x) => (
+                    <li key={x} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />{x}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="faq" className="bg-slate-50 py-20">
-        <div className="container mx-auto px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-4">Preguntas frecuentes</Badge>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">¿Tienes dudas?</h2>
+        {/* PRECIOS */}
+        <section id="precios" aria-labelledby="precios-titulo" className="scroll-mt-24 py-16 md:py-24">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 id="precios-titulo" className="text-3xl font-bold tracking-tight md:text-4xl">Precios claros, sin permanencia</h2>
+              <p className="mt-3 text-slate-600">
+                Ahora, durante el lanzamiento, es <strong>gratis</strong>. Si te registras antes de la apertura oficial, tendrás un{' '}
+                <strong>{EARLY_ACCESS.discount} de descuento durante {EARLY_ACCESS.months} meses</strong> sobre estos precios.
+              </p>
+            </div>
+            <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-3">
+              {PLANS.map((p) => (
+                <div key={p.id} data-testid={`landing-plan-${p.key}`} className={`relative flex flex-col rounded-2xl border bg-white p-6 ${p.popular ? 'border-indigo-500 shadow-lg ring-1 ring-indigo-500' : 'border-slate-200'}`}>
+                  {p.popular && <span className="absolute -top-3 left-6 rounded-full bg-indigo-600 px-3 py-0.5 text-xs font-semibold text-white">Más elegido</span>}
+                  <h3 className="text-lg font-bold">{p.name}</h3>
+                  <p className="text-sm text-slate-500">{p.tagline}</p>
+                  <p className="my-4">
+                    <span className="text-4xl font-extrabold">{p.monthly ? p.monthly.toLocaleString('es-ES') : '0'} €</span>
+                    <span className="text-slate-500">/mes</span>
+                    {p.yearly > 0 && <span className="block text-xs text-emerald-600">o {p.yearly} €/año</span>}
+                  </p>
+                  <ul className="mb-6 flex-1 space-y-2 text-sm">
+                    {p.features.map((f) => <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />{f}</li>)}
+                  </ul>
+                  <PrimaryCta location={`pricing-${p.key}`} label="Empezar gratis" className="w-full !py-2.5 !text-sm" />
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 text-center text-xs text-slate-500">Los pagos de las suscripciones se gestionan de forma segura con Stripe. Puedes cambiar de plan o cancelar cuando quieras.</p>
           </div>
-          <div className="mx-auto mt-12 grid max-w-3xl gap-4">
-            {FAQ.map((item) => (
-              <Card key={item.q} className="border-slate-200">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-slate-900">{item.q}</h3>
-                  <p className="mt-2 text-sm text-slate-600">{item.a}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <p className="mt-10 text-center text-sm text-slate-500">
-            ¿Otra duda? Escríbenos a <a href="mailto:reserva360.app@gmail.com" className="text-indigo-600 hover:underline">reserva360.app@gmail.com</a>
-          </p>
-        </div>
-      </section>
+        </section>
 
-      {/* FINAL CTA */}
-      <section className="bg-gradient-to-br from-indigo-600 to-violet-600 py-20">
-        <div className="container mx-auto px-6 text-center text-white">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">¿Listo para gestionar tu negocio mejor?</h2>
-          <p className="mt-4 text-lg text-indigo-100">Crea tu cuenta en 30 segundos. Sin tarjeta. Sin permanencia.</p>
-          <Button size="lg" asChild className="mt-8 gap-2 bg-white text-indigo-700 hover:bg-indigo-50 text-base shadow-xl">
-            <Link href="/auth/signup">Empezar gratis ahora <ArrowRight className="h-4 w-4" /></Link>
-          </Button>
+        {/* ACCESO ANTICIPADO */}
+        <div className="container mx-auto px-4 md:px-6">
+          <EarlyAccessCard location="early-access-home" />
         </div>
-      </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white py-12">
-        <div className="container mx-auto grid gap-8 px-6 md:grid-cols-4">
-          <div>
-            <img src="/logo-reserva360.png" alt="Reserva360" className="h-9 w-auto" />
-            <p className="mt-3 text-sm text-slate-500">El SaaS de gestión de citas y reservas para profesionales y negocios basados en agenda.</p>
+        {/* FAQ */}
+        <section id="faq" aria-labelledby="faq-titulo" className="scroll-mt-24 py-16 md:py-24">
+          <div className="container mx-auto max-w-3xl px-4 md:px-6">
+            <h2 id="faq-titulo" className="text-center text-3xl font-bold tracking-tight md:text-4xl">Preguntas frecuentes</h2>
+            <div className="mt-10"><Faq faqs={FAQS} /></div>
+            <p className="mt-6 text-center text-sm text-slate-600">
+              ¿Tienes otra duda? Lee nuestro <Link href="/blog" className="font-medium text-indigo-600 hover:underline">blog</Link> o escríbenos a{' '}
+              <a href="mailto:reserva360.app@gmail.com" className="font-medium text-indigo-600 hover:underline">reserva360.app@gmail.com</a>.
+            </p>
           </div>
-          <div>
-            <h4 className="font-semibold text-slate-900">Producto</h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li><a href="#features" className="hover:text-slate-900">Funciones</a></li>
-              <li><a href="#industries" className="hover:text-slate-900">Para quién</a></li>
-            </ul>
+        </section>
+
+        {/* CTA FINAL */}
+        <section aria-labelledby="cta-final" className="pb-20">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="rounded-3xl bg-slate-900 px-6 py-14 text-center text-white md:px-12">
+              <h2 id="cta-final" className="text-3xl font-bold md:text-4xl">Organiza tus citas desde hoy</h2>
+              <p className="mx-auto mt-3 max-w-xl text-slate-300">Crea tu cuenta en unos minutos y comparte tu enlace de reservas con tus clientes.</p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <PrimaryCta location="final" />
+                <Link href="/#como-funciona" className="inline-flex items-center justify-center gap-1 px-6 py-3.5 text-sm font-semibold text-slate-200 hover:text-white">
+                  Ver cómo funciona <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+              <p className="mt-4 text-sm text-slate-400">{EARLY_ACCESS.short} · {EARLY_ACCESS.noCard}</p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold text-slate-900">Empresa</h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li><a href="mailto:reserva360.app@gmail.com" className="hover:text-slate-900">Contacto</a></li>
-              <li><a href="#faq" className="hover:text-slate-900">Preguntas</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-slate-900">Cuenta</h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li><Link href="/auth/login" className="hover:text-slate-900">Iniciar sesión</Link></li>
-              <li><Link href="/auth/signup" className="hover:text-slate-900">Crear cuenta</Link></li>
-            </ul>
-          </div>
-        </div>
-        <div className="container mx-auto mt-10 border-t border-slate-100 px-6 pt-6 text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} Reserva360. Todos los derechos reservados.
-        </div>
-      </footer>
+        </section>
+      </main>
+
+      <MarketingFooter />
     </div>
   );
 }

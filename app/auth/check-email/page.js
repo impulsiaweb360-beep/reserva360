@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail } from 'lucide-react';
+import TrackEvent from '@/components/marketing/TrackEvent';
 
 export default function CheckEmailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center p-6">
+      {/* Registro completado (esta página solo se muestra tras un alta correcta). Sin datos personales. */}
+      <TrackEvent event="sign_up" params={{ method: 'email' }} />
       <Card className="max-w-md w-full">
         <CardContent className="p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100">

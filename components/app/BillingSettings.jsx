@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Check, Loader2, CreditCard, ExternalLink, AlertTriangle, Sparkles } from 'lucide-react';
 import { PLANS } from '@/lib/plans';
+import { track } from '@/lib/analytics';
 
 const eur = (n) => `${Number(n).toLocaleString('es-ES', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
@@ -27,7 +28,10 @@ export default function BillingSettings() {
       if (sp.get('billing') === 'success' && sessionId) {
         const r = await fetch(`/api/billing/verify?session_id=${encodeURIComponent(sessionId)}`);
         const j = await r.json().catch(() => ({}));
-        if (j.ok) toast.success('¡Suscripción activada! Gracias por confiar en Reserva360.');
+        if (j.ok) {
+          toast.success('¡Suscripción activada! Gracias por confiar en Reserva360.');
+          track('subscription_purchase', { plan: j.planId || 'desconocido', currency: 'EUR' });
+        }
       } else if (sp.get('billing') === 'cancelled') {
         toast.info('Pago cancelado. No se ha realizado ningún cargo.');
       }

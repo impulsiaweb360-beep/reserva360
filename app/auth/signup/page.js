@@ -6,6 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import AuthForm from '../auth-form';
 
+import { pageMetadata } from '@/lib/site';
+
+export const metadata = {
+  ...pageMetadata({
+    title: 'Crear cuenta gratis | Reserva360',
+    description: 'Crea tu cuenta de Reserva360 gratis y sin tarjeta: página de reservas online, agenda por profesional y recordatorios automáticos.',
+    path: '/auth/signup',
+  }),
+  robots: { index: true, follow: true },
+};
+
 export default function SignupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex flex-col">

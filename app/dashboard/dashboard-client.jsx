@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import PlanBanner from '@/components/app/PlanBanner';
+import ConversionTracker from '@/components/app/ConversionTracker';
 import { SupabaseAppProvider, useApp } from '@/lib/supabase-store';
 import Shell from '@/components/app/Shell';
 import { SuperAdminDashboard, TenantDashboard } from '@/components/app/Dashboards';
@@ -46,6 +47,7 @@ function AppShellInner() {
   return (
     <Shell active={current} setActive={setActive}>
       {session.role === 'tenant_admin' && <PlanBanner onUpgrade={() => setActive('settings')} />}
+      {session.role === 'tenant_admin' && <ConversionTracker tenantId={session.tenantId} />}
       {renderContent(current, session)}
     </Shell>
   );

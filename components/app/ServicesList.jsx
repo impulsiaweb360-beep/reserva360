@@ -75,6 +75,7 @@ export default function ServicesList({ tenantId }) {
               <div className="grid grid-cols-3 gap-3">
                 <div><Label className="text-xs">Duración (min)</Label><Input type="number" value={editing.duration} onChange={(e) => setEditing({ ...editing, duration: e.target.value })} /></div>
                 <div><Label className="text-xs">Precio (€)</Label><Input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: e.target.value })} /></div>
+                <div><Label className="text-xs">Color</Label><Input type="color" value={editing.color} onChange={(e) => setEditing({ ...editing, color: e.target.value })} /></div>
               </div>
               {paymentsReady && (
                 <div className="space-y-2 rounded-lg border p-3">
@@ -92,9 +93,6 @@ export default function ServicesList({ tenantId }) {
                   )}
                 </div>
               )}
-              <div className="hidden"></div>
-                <div><Label className="text-xs">Color</Label><Input type="color" value={editing.color} onChange={(e) => setEditing({ ...editing, color: e.target.value })} /></div>
-              </div>
               <div className="flex items-center gap-2"><Switch checked={editing.active} onCheckedChange={(v) => setEditing({ ...editing, active: v })} /><span className="text-sm">Activo</span></div>
             </div>
           )}

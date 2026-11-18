@@ -47,6 +47,16 @@ const nextConfig = {
           { key: "Access-Control-Allow-Headers", value: "*" },
         ],
       },
+      // Zonas privadas: nunca indexar (refuerzo de robots.txt y de las metaetiquetas)
+      ...['/dashboard', '/dashboard/:path*', '/api/:path*', '/manage/:path*'].map((source) => ({
+        source,
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      })),
+      // Recursos estáticos de marketing con caché larga
+      ...['/screenshots/:path*', '/brand/:path*', '/og/:path*'].map((source) => ({
+        source,
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" }],
+      })),
     ];
   },
 };
