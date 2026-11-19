@@ -13,10 +13,14 @@ export async function POST(request) {
   if (!appointment_id || !['created', 'rescheduled', 'cancelled'].includes(event)) {
     return NextResponse.json({ error: 'Parámetros no válidos' }, { status: 400 });
   }
-  const { data: appt } = await s.admin.from('appointments').select('id, tenant_id').eq('id', appointment_id).maybeSingle();
+  const { data: appt } = await s.admin.from('appointments').select('id, tenant_id, start_at').eq('id', appointment_id).maybeSingle();
   if (!appt) return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 });
   if (s.profile.role !== 'super_admin' && s.profile.tenant_id !== appt.tenant_id) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+  }
+  // No se avisa de citas cuya hora ya ha pasado (el enlace para cambiarla no serviría)
+  if (new Date(appt.start_at).getTime() < Date.now()) {
+    return NextResponse.json({ ok: true, skipped: 'past_appointment' });
   }
   const result = await notifyAppointment(s.admin, appt.id, event, { baseUrl: getBaseUrl(request), notifyBusiness: false });
   return NextResponse.json({ ok: true, result });

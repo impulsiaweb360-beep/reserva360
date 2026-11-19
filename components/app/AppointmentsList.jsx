@@ -11,8 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { STATUS_CONFIG, PAYMENT_STATUS } from '@/lib/mockData';
-import { Search, Eye, Trash2 } from 'lucide-react';
+import { Search, Eye, Trash2, Pencil } from 'lucide-react';
 import AppointmentDetailDialog from './AppointmentDetailDialog';
+import AppointmentDialog from './AppointmentDialog';
 import { toast } from 'sonner';
 
 export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
@@ -21,6 +22,7 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
   const [status, setStatus] = useState('all');
   const [q, setQ] = useState('');
   const [detailId, setDetailId] = useState(null);
+  const [editId, setEditId] = useState(null);
 
   const handleDelete = (e, id) => {
     e.stopPropagation();
@@ -99,6 +101,9 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
                     <td className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => setDetailId(a.id)} title="Ver detalle"><Eye className="h-4 w-4" /></Button>
+                        {['pending', 'confirmed'].includes(a.status) && (
+                          <Button variant="ghost" size="icon" onClick={() => setEditId(a.id)} title="Modificar" data-testid={`appt-edit-${a.id}`}><Pencil className="h-4 w-4 text-indigo-600" /></Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={(e) => handleDelete(e, a.id)} title="Eliminar"><Trash2 className="h-4 w-4 text-rose-500" /></Button>
                       </div>
                     </td>
@@ -137,6 +142,11 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
                 <div className="mt-2 flex items-center justify-between">
                   <Badge variant="secondary" className={pay.color}>{pay.label} · {amount}€</Badge>
                   <div className="flex items-center gap-1">
+                    {['pending', 'confirmed'].includes(a.status) && (
+                      <span role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); setEditId(a.id); }} className="rounded p-1 hover:bg-indigo-50" title="Modificar">
+                        <Pencil className="h-4 w-4 text-indigo-600" />
+                      </span>
+                    )}
                     <button onClick={(e) => handleDelete(e, a.id)} className="rounded p-1 hover:bg-rose-50" title="Eliminar">
                       <Trash2 className="h-4 w-4 text-rose-500" />
                     </button>
@@ -151,6 +161,7 @@ export default function AppointmentsList({ tenantId, lockEmployeeId = null }) {
         {list.length === 0 && <div className="py-10 text-center text-sm text-slate-400">Sin reservas</div>}
       </CardContent>
       <AppointmentDetailDialog appointmentId={detailId} onOpenChange={(v) => !v && setDetailId(null)} />
+      <AppointmentDialog open={!!editId} editId={editId} onOpenChange={(v) => !v && setEditId(null)} />
     </Card>
   );
 }

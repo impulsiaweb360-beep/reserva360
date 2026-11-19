@@ -319,7 +319,8 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "WhatsApp notify skips past appointments + robust phone lookup"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -332,6 +333,13 @@ agent_communication:
       2. /api/cron/reminders-24h?secret=reserva360-cron-secret-change-me debe devolver 200 con JSON {checked, results}.
       3. /dashboard sin sesión redirige a /auth/login.
       Cuenta de prueba Supabase ya configurada con SMTP Resend.
+  - agent: main
+    message: |
+      Focused backend review request (read-only testing):
+      1. app/api/whatsapp/notify/route.js - Verify POST without session returns 401, with invalid body still 401, and past appointment logic
+      2. lib/phone.js - Test findClientsByPhone, samePhone, normalizePhone functions
+      3. lib/appointment-move.js - Test checkMove with various business hours scenarios
+      4. Regression tests: /, /book/fisiovital-s24q, /api/public/fisiovital-s24q/slots, /api/billing/status, /dashboard
   - agent: testing
     message: |
       ✅ BACKEND TESTING COMPLETE - ALL TESTS PASSED (9/9)
@@ -568,6 +576,52 @@ agent_communication:
       12) ANALYTICS & PRIVACY (3/3 passed):
          ✓ Home page does NOT contain server-side GTM script (googletagmanager.com/gtm.js)
          ✓ GTM ID (GTM-PV9TZ3P2) present in lib/site.js for client-side loading
+  - agent: testing
+    message: |
+      ✅ FOCUSED BACKEND REVIEW COMPLETE - ALL TESTS PASSED (9/9)
+      
+      Completed focused review request with READ-ONLY testing (no data created/modified/deleted in live Supabase).
+      
+      TEST RESULTS:
+      
+      1) app/api/whatsapp/notify/route.js ✅
+         - POST without session returns 401 {error: 'No autorizado'} ✓
+         - POST with invalid body (no session) still returns 401 {error: 'No autorizado'} ✓
+         - CODE REVIEW: Past appointment logic correct (lines 22-24) - returns {ok:true, skipped:'past_appointment'} when start_at < Date.now() ✓
+      
+      2) lib/phone.js functions ✅ (4/4 tests passed via node script with esbuild)
+         - samePhone('+34627128723', '627 12 87 23') === true ✓
+         - samePhone('+34627128723', '627-128-723') === true ✓
+         - samePhone('+34627128723', '627128724') === false ✓
+         - normalizePhone('627128723') === '+34627128723' ✓
+         - CODE REVIEW: findClientsByPhone uses .ilike('phone', `%${lastDigit}`) and filters with samePhone (last 9 digits) ✓
+      
+      3) lib/appointment-move.js checkMove ✅ (8/8 tests passed via node script with esbuild)
+         Business hours: Mon–Fri 09:00–19:00 break 14:00–15:00, Sat 10:00–14:00, Sun closed
+         - Future Tuesday 10:00/45min → ok:true, warnings:[] ✓
+         - Future Tuesday 08:30 → ok:false (before opening) ✓
+         - Future Tuesday 18:30 (ends 19:15) → ok:false (after closing) ✓
+         - Future Tuesday 13:30 → ok:true, warnings:['descanso'] ✓
+         - Overlapping appointment → ok:true, warnings:['solapa'] ✓
+         - Sunday → ok:false (closed) ✓
+         - Past time → ok:false ✓
+         - Past time with allowPast:true → ok:true ✓
+      
+      4) Regression tests (read-only) ✅ (5/5 passed)
+         - GET / → 200 ✓
+         - GET /book/fisiovital-s24q → 200 and contains 'FisioVital' ✓
+         - GET /api/public/fisiovital-s24q/slots → responds (400 for missing service_id, expected) ✓
+         - GET /api/billing/status → 401 without session ✓
+         - GET /dashboard → 307 redirect without session ✓
+      
+      IMPLEMENTATION VERIFIED:
+      - WhatsApp notify endpoint authentication working correctly
+      - Phone normalization and matching logic working correctly (handles spaces, dashes, country codes)
+      - Appointment move validation working correctly (business hours, breaks, overlaps, past dates)
+      - All regression endpoints working as expected
+      
+      NO ISSUES FOUND. All backend logic verified and working correctly.
+
          ✓ No PII (emails/phones) pushed in lib/analytics.js (code review)
       
       MINOR NOTES:

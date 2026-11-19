@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 dayjs.locale('es');
@@ -8,13 +9,16 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { STATUS_CONFIG, PAYMENT_STATUS } from '@/lib/mockData';
-import { CalendarClock, User, Briefcase, CreditCard, CheckCircle2, XCircle, Clock, UserX, Trash2, Euro } from 'lucide-react';
+import { CalendarClock, User, Briefcase, CreditCard, CheckCircle2, XCircle, Clock, UserX, Trash2, Euro, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import AppointmentDialog from './AppointmentDialog';
 
 export default function AppointmentDetailDialog({ appointmentId, onOpenChange }) {
   const { appointments, clients, services, employees, appointmentsApi, refresh } = useApp();
+  const [editOpen, setEditOpen] = useState(false);
   const a = appointments.find((x) => x.id === appointmentId);
   if (!a) return null;
+  const canEdit = ['pending', 'confirmed'].includes(a.status);
   const cli = clients.find((c) => c.id === a.clientId);
   const svc = services.find((s) => s.id === a.serviceId);
   const emp = employees.find((e) => e.id === a.employeeId);
@@ -74,7 +78,8 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
   };
 
   return (
-    <Dialog open={!!appointmentId} onOpenChange={onOpenChange}>
+    <>
+    <Dialog open={!!appointmentId && !editOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -97,6 +102,7 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
           {a.notes && <div className="rounded-lg border bg-slate-50 p-2 text-xs text-slate-600">{a.notes}</div>}
         </div>
         <DialogFooter className="flex-wrap gap-2 sm:justify-start">
+          {canEdit && <Button size="sm" onClick={() => setEditOpen(true)} data-testid="appt-detail-edit"><Pencil className="mr-1 h-4 w-4" /> Modificar</Button>}
           {a.status !== 'confirmed' && <Button size="sm" variant="outline" onClick={() => setStatus('confirmed')}><CheckCircle2 className="mr-1 h-4 w-4" /> Confirmar</Button>}
           {a.status !== 'completed' && <Button size="sm" variant="outline" onClick={() => setStatus('completed')}><CheckCircle2 className="mr-1 h-4 w-4" /> Completada</Button>}
           {!isPaid && <Button size="sm" variant="outline" onClick={markPaid} className="border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"><Euro className="mr-1 h-4 w-4" /> Marcar pagada</Button>}
@@ -106,5 +112,7 @@ export default function AppointmentDetailDialog({ appointmentId, onOpenChange })
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <AppointmentDialog open={editOpen} editId={a.id} onOpenChange={(v) => { setEditOpen(v); if (!v) onOpenChange(false); }} />
+    </>
   );
 }

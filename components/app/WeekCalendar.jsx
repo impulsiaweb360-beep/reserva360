@@ -13,15 +13,21 @@ import { ChevronLeft, ChevronRight, Plus, CalendarDays, LayoutGrid, AlertTriangl
 import AppointmentDialog from './AppointmentDialog';
 import AppointmentDetailDialog from './AppointmentDetailDialog';
 import { STATUS_CONFIG } from '@/lib/mockData';
+import { checkMove } from '@/lib/appointment-move';
+import { toast } from 'sonner';
 
 const HOURS = Array.from({ length: 12 }, (_, i) => 8 + i); // 08:00-19:00
 const HOUR_HEIGHT = 56; // px per hour
+const SNAP = 15; // minutos
+const DRAGGABLE = ['pending', 'confirmed'];
 
 // Lunes de la semana de una fecha (independiente del locale: lunes → domingo)
 const mondayOf = (d) => dayjs(d).startOf('day').subtract((dayjs(d).day() + 6) % 7, 'day');
 
 export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = false }) {
-  const { appointments, employees, clients, services, byTenant } = useApp();
+  const { appointments, employees, clients, services, byTenant, tenants, appointmentsApi } = useApp();
+  const [drag, setDrag] = useState(null); // { id, grabMin, duration }
+  const [preview, setPreview] = useState(null); // { dayKey, minutes }
   const [weekStart, setWeekStart] = useState(() => mondayOf(dayjs())); // Lunes
   const [filter, setFilter] = useState(employeeFilter || 'all');
   const [openCreate, setOpenCreate] = useState(false);
@@ -58,6 +64,65 @@ export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = 
   }, [appointments, tenantId, filter, employeeFilter, lockEmployee, byTenant]);
 
   const apptsByDay = (day) => visible.filter((a) => dayjs(a.start).isSame(day, 'day'));
+
+  // ---------- Arrastrar y soltar ----------
+  const minutesFromEvent = (e, grabMin = 0) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const raw = (y / HOUR_HEIGHT) * 60 - grabMin;
+    const snapped = Math.round(raw / SNAP) * SNAP;
+    return Math.max(0, Math.min(HOURS.length * 60 - SNAP, snapped)) + HOURS[0] * 60;
+  };
+
+  const onDragStart = (e, a) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const grabMin = ((e.clientY - rect.top) / HOUR_HEIGHT) * 60;
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', a.id); } catch { /* */ }
+    setDrag({ id: a.id, grabMin, duration: dayjs(a.end).diff(dayjs(a.start), 'minute') });
+  };
+
+  const onDragEnd = () => { setDrag(null); setPreview(null); };
+
+  const onDragOverDay = (e, d) => {
+    if (!drag) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const minutes = minutesFromEvent(e, drag.grabMin);
+    const dayKey = d.format('YYYY-MM-DD');
+    if (!preview || preview.dayKey !== dayKey || preview.minutes !== minutes) setPreview({ dayKey, minutes });
+  };
+
+  const onDropDay = async (e, d) => {
+    if (!drag) return;
+    e.preventDefault();
+    const minutes = minutesFromEvent(e, drag.grabMin);
+    const a = appointments.find((x) => x.id === drag.id);
+    setDrag(null);
+    setPreview(null);
+    if (!a) return;
+    const newStart = d.startOf('day').add(minutes, 'minute');
+    const newEnd = newStart.add(drag.duration, 'minute');
+    if (newStart.isSame(dayjs(a.start))) return;
+    const tenant = tenants.find((t) => t.id === a.tenantId);
+    const employee = employees.find((x) => x.id === a.employeeId);
+    const check = checkMove({ start: newStart, end: newEnd, tenant, employee, employeeId: a.employeeId, tenantId: a.tenantId, appointments, excludeId: a.id });
+    if (!check.ok) { toast.error(check.reason); return; }
+    for (const w of check.warnings) {
+      if (!window.confirm(`⚠️ ${w}\n\n¿Mover la cita igualmente?`)) return;
+    }
+    const cli = clients.find((c) => c.id === a.clientId);
+    const ok = window.confirm(
+      `¿Mover la cita${cli ? ` de ${cli.firstName} ${cli.lastName || ''}`.trimEnd() : ''} al ${newStart.format('dddd D [de] MMMM')} a las ${newStart.format('HH:mm')}?\n\nSi tienes WhatsApp conectado, se avisará al cliente del cambio.`
+    );
+    if (!ok) return;
+    try {
+      await appointmentsApi.update(a.id, { start: newStart.toISOString(), end: newEnd.toISOString() });
+      toast.success(`Cita movida al ${newStart.format('ddd D MMM, HH:mm')}`);
+    } catch (err) {
+      toast.error(`No se pudo mover la cita: ${err?.message || 'error desconocido'}`);
+    }
+  };
 
   const handleSlotClick = (day, hour) => {
     setCreateInit({
@@ -161,6 +226,10 @@ export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = 
         </div>
       )}
 
+      <p className="hidden text-xs text-slate-500 md:block">
+        Consejo: arrastra una cita a otra hora o a otro día para cambiarla. Solo se permite dentro del horario del negocio y del empleado. Haz clic en una cita para ver el detalle o modificarla.
+      </p>
+
       <Card className="overflow-hidden">
         <div className="grid" style={{ gridTemplateColumns: gridCols }}>
           <div className="border-b border-r border-slate-200 bg-slate-50" />
@@ -201,12 +270,21 @@ export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = 
               }
             }
             return (
-              <div key={d.toString()} className="relative border-r border-slate-200">
+              <div key={d.toString()} className="relative border-r border-slate-200"
+                data-testid={`cal-day-${d.format('YYYY-MM-DD')}`}
+                onDragOver={(e) => onDragOverDay(e, d)}
+                onDrop={(e) => onDropDay(e, d)}>
                 {HOURS.map((h) => (
                   <button key={h} onClick={() => handleSlotClick(d, h)}
                     className="block w-full border-b border-slate-100 hover:bg-slate-50 transition"
                     style={{ height: HOUR_HEIGHT }} />
                 ))}
+                {drag && preview?.dayKey === d.format('YYYY-MM-DD') && (
+                  <div className="pointer-events-none absolute left-1 right-1 z-20 rounded-md border-2 border-dashed border-indigo-500 bg-indigo-100/70 p-1 text-[11px] font-semibold text-indigo-800"
+                    style={{ top: ((preview.minutes - HOURS[0] * 60) / 60) * HOUR_HEIGHT, height: Math.max(28, (drag.duration / 60) * HOUR_HEIGHT - 2) }}>
+                    {dayjs().startOf('day').add(preview.minutes, 'minute').format('HH:mm')} – {dayjs().startOf('day').add(preview.minutes + drag.duration, 'minute').format('HH:mm')}
+                  </div>
+                )}
                 {dayAppts.map((a) => {
                   const start = dayjs(a.start);
                   const end = dayjs(a.end);
@@ -219,9 +297,15 @@ export default function WeekCalendar({ tenantId, employeeFilter, lockEmployee = 
                   const emp = employees.find((e) => e.id === a.employeeId);
                   const cfg = STATUS_CONFIG[a.status];
                   const isOverlap = overlapIds.has(a.id);
+                  const canDrag = DRAGGABLE.includes(a.status);
                   return (
                     <button key={a.id} onClick={() => setDetailId(a.id)}
-                      className={`absolute left-1 right-1 overflow-hidden rounded-md border-l-4 p-1.5 text-left text-[11px] shadow-sm transition hover:shadow-md ${isOverlap ? 'bg-rose-50 ring-2 ring-rose-400 ring-offset-1' : 'bg-white'}`}
+                      draggable={canDrag}
+                      onDragStart={canDrag ? (e) => onDragStart(e, a) : undefined}
+                      onDragEnd={onDragEnd}
+                      data-testid={`cal-appt-${a.id}`}
+                      title={canDrag ? 'Haz clic para ver o modificar · Arrastra para cambiar la hora o el día' : 'Haz clic para ver el detalle'}
+                      className={`absolute left-1 right-1 overflow-hidden rounded-md border-l-4 p-1.5 text-left text-[11px] shadow-sm transition hover:shadow-md ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${drag?.id === a.id ? 'opacity-40' : ''} ${isOverlap ? 'bg-rose-50 ring-2 ring-rose-400 ring-offset-1' : 'bg-white'}`}
                       style={{ top, height, borderLeftColor: svc?.color || emp?.color || '#6366f1' }}>
                       {isOverlap && (
                         <span className="absolute right-1 top-1 flex h-4 items-center gap-0.5 rounded bg-rose-500 px-1 text-[8px] font-bold text-white">
