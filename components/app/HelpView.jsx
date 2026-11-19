@@ -121,24 +121,6 @@ export default function HelpView({ tenantId, onNavigate }) {
         </CardContent>
       </Card>
 
-      {/* Atajo WhatsApp */}
-      <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5">
-        <div className="flex items-start gap-3">
-          <MessageCircle className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
-          <div className="text-sm text-slate-700">
-            <p className="text-base font-semibold text-slate-900">¿Quieres que tus clientes reserven por WhatsApp? Tienes dos formas:</p>
-            <ul className="mt-2 space-y-1.5">
-              <li><B>La más fácil:</B> pon tu enlace de reservas como <B>mensaje predefinido</B> en la app WhatsApp Business. Quien te escriba recibe el enlace y reserva solo.</li>
-              <li><B>La más completa:</B> conecta tu WhatsApp con <B>YCloud</B> y un <B>chatbot</B> con menús reserva, cambia y cancela citas dentro del propio chat, y envía confirmaciones y recordatorios.</li>
-            </ul>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setOpen((o) => Array.from(new Set([...o, 'wa-facil'])))}>Ver la forma fácil</Button>
-              <Button size="sm" variant="outline" onClick={() => setOpen((o) => Array.from(new Set([...o, 'wa-ycloud'])))}>Ver cómo conectar YCloud</Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <Accordion type="multiple" value={open} onValueChange={setOpen} className="space-y-3">
         {/* 0. Primeros pasos */}
         <AccordionItem value="inicio" className="rounded-xl border bg-white px-4">
