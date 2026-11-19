@@ -128,7 +128,7 @@ export default function HelpView({ tenantId, onNavigate }) {
           <div className="text-sm text-slate-700">
             <p className="text-base font-semibold text-slate-900">¿Quieres que tus clientes reserven por WhatsApp? Tienes dos formas:</p>
             <ul className="mt-2 space-y-1.5">
-              <li><B>La más fácil (5 minutos, gratis):</B> pon tu enlace de reservas como <B>mensaje predefinido</B> en la app WhatsApp Business. Quien te escriba recibe el enlace y reserva solo.</li>
+              <li><B>La más fácil:</B> pon tu enlace de reservas como <B>mensaje predefinido</B> en la app WhatsApp Business. Quien te escriba recibe el enlace y reserva solo.</li>
               <li><B>La más completa:</B> conecta tu WhatsApp con <B>YCloud</B> y un <B>chatbot</B> con menús reserva, cambia y cancela citas dentro del propio chat, y envía confirmaciones y recordatorios.</li>
             </ul>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -380,9 +380,11 @@ export default function HelpView({ tenantId, onNavigate }) {
         </AccordionItem>
       </Accordion>
 
-      <p className="text-center text-sm text-slate-500">
-        ¿Te has quedado atascado? Escríbenos a <a href="mailto:reserva360.app@gmail.com" className="font-medium text-indigo-600 hover:underline">reserva360.app@gmail.com</a>.
-      </p>
+      <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-5 text-center text-sm text-indigo-900" data-testid="help-contact">
+        Cualquier duda con la configuración, escríbenos un email a{' '}
+        <a href="mailto:reserva360.app@gmail.com" className="font-semibold text-indigo-700 underline">reserva360.app@gmail.com</a>{' '}
+        y te ayudaremos.
+      </div>
     </div>
   );
 }
