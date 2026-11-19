@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Calendar, LayoutDashboard, Users, Briefcase, UserRound, Settings, LogOut, BarChart3, CreditCard, Building2, Shield, ChevronDown, RefreshCw, Bell, X } from 'lucide-react';
+import { Calendar, LayoutDashboard, Users, Briefcase, UserRound, Settings, LogOut, BarChart3, CreditCard, Building2, Shield, ChevronDown, RefreshCw, Bell, X, LifeBuoy } from 'lucide-react';
 import TenantLogo from '@/components/app/TenantLogo';
 
 const SIDEBAR_BY_ROLE = {
@@ -24,6 +24,7 @@ const SIDEBAR_BY_ROLE = {
     { id: 'services', label: 'Servicios', icon: Briefcase },
     { id: 'payments', label: 'Pagos', icon: CreditCard },
     { id: 'settings', label: 'Configuración', icon: Settings },
+    { id: 'help', label: 'Ayuda', icon: LifeBuoy },
   ],
   employee: [
     { id: 'emp_calendar', label: 'Mi calendario', icon: Calendar },

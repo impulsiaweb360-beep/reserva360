@@ -17,6 +17,7 @@ import PlansView from '@/components/app/PlansView';
 import AnalyticsView from '@/components/app/AnalyticsView';
 import SettingsView from '@/components/app/SettingsView';
 import EmployeeSchedule from '@/components/app/EmployeeSchedule';
+import HelpView from '@/components/app/HelpView';
 
 const DEFAULT_BY_ROLE = {
   super_admin: 'sa_dashboard',
@@ -48,12 +49,13 @@ function AppShellInner() {
     <Shell active={current} setActive={setActive}>
       {session.role === 'tenant_admin' && <PlanBanner onUpgrade={() => setActive('settings')} />}
       {session.role === 'tenant_admin' && <ConversionTracker tenantId={session.tenantId} />}
-      {renderContent(current, session)}
+      {renderContent(current, session, setActive)}
     </Shell>
   );
 }
 
-function renderContent(view, session) {
+function renderContent(view, session, setActive) {
+  if (view === 'help') return <HelpView tenantId={session.tenantId} onNavigate={(v) => { setActive(v); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); }} />;
   if (view === 'sa_dashboard') return <SuperAdminDashboard />;
   if (view === 'sa_tenants') return <TenantsList />;
   if (view === 'sa_plans') return <PlansView />;
