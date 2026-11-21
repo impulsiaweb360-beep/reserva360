@@ -85,11 +85,16 @@ async function stripeSub(tenantId, priceId, { founder = true } = {}) {
   });
   return { clock, cust, sub, t: clock.frozen_time };
 }
-async function advance(ctx, days) {
-  ctx.t += days * 86400;
+async function advanceTo(ctx, t) {
+  ctx.t = t;
   await stripe.testHelpers.testClocks.advance(ctx.clock.id, { frozen_time: ctx.t });
   for (let i = 0; i < 90; i++) { const c = await stripe.testHelpers.testClocks.retrieve(ctx.clock.id); if (c.status === 'ready') return; await sleep(2000); }
   throw new Error('reloj de prueba sin terminar');
+}
+// Avanza N días y luego 1 día más: en el reloj de prueba, Stripe cobra el borrador de renovación en el siguiente avance
+async function advance(ctx, days) {
+  await advanceTo(ctx, ctx.t + days * 86400);
+  await advanceTo(ctx, ctx.t + 86400);
 }
 const paidInvoices = async (subId) => (await stripe.invoices.list({ subscription: subId, status: 'paid', limit: 20 })).data.reverse();
 async function deliverNewPaidInvoices(ctx, seen) {
@@ -235,7 +240,9 @@ async function main() {
   ok('12. Cambia el propietario → conserva el historial y no obtiene otro beneficio', bA2.benefit_status === 'finished' && bA2.cycles_used === 3 && (await rpc('founder_claim', { p_tenant: A.id })).reason === 'already_used');
 
   // ---------- 16: el administrador intenta duplicar ----------
-  const dupAdmin = await sb.rpc('founder_admin_action', { p_tenant: A.id, p_admin: superAdmin.id, p_action: 'set_eligible', p_reason: 'prueba duplicar' });
+  const ckSA = await cookieFor({ email: 'reserva360.app@gmail.com', password: 'Reserva360_79' });
+  const dupApi = await api(`/api/admin/founders/${A.id}`, { method: 'POST', cookie: ckSA.cookie, body: { action: 'set_eligible', reason: 'prueba duplicar' } });
+  const dupAdmin = { error: dupApi.status === 409 ? { message: dupApi.json.error } : null };
   const { count: blocked } = await sb.from('activity_log').select('id', { count: 'exact', head: true }).eq('tenant_id', A.id).eq('action', 'founder.admin_blocked');
   const direct = await sb.from('founder_benefits').update({ benefit_status: 'none', cycles_used: 0 }).eq('tenant_id', A.id);
   const second = await sb.from('founder_benefits').insert({ tenant_id: A.id });

@@ -224,7 +224,7 @@ export default function FoundersAdminView() {
       <Card>
         <CardHeader className="flex flex-col gap-3 space-y-0 pb-3 md:flex-row md:items-center md:justify-between">
           <Tabs value={filter} onValueChange={setFilter}>
-            <TabsList className="flex-wrap">
+            <TabsList className="h-auto flex-wrap justify-start">
               <TabsTrigger value="all">Todos</TabsTrigger>
               <TabsTrigger value="eligible">Elegibles</TabsTrigger>
               <TabsTrigger value="not_eligible">No elegibles</TabsTrigger>
@@ -233,10 +233,10 @@ export default function FoundersAdminView() {
               <TabsTrigger value="finished">Finalizados</TabsTrigger>
             </TabsList>
           </Tabs>
-          <div className="flex gap-2">
-            <div className="relative">
+          <div className="flex w-full flex-wrap gap-2 md:w-auto">
+            <div className="relative min-w-0 flex-1 md:flex-none">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-              <Input className="w-64 pl-8" placeholder="Negocio, propietario o ID" value={q} onChange={(e) => setQ(e.target.value)} data-testid="founders-search" />
+              <Input className="w-full pl-8 md:w-64" placeholder="Negocio, propietario o ID" value={q} onChange={(e) => setQ(e.target.value)} data-testid="founders-search" />
             </div>
             <Button variant="outline" onClick={() => setShowAudit(true)} data-testid="founders-audit-btn"><History className="mr-1 h-4 w-4" /> Auditoría</Button>
           </div>

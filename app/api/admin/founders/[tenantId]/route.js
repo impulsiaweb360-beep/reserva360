@@ -32,7 +32,14 @@ export async function POST(request, { params }) {
     if (!['set_eligible', 'set_not_eligible', 'revoke'].includes(action)) return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
     const { data: before } = await s.admin.from('founder_benefits').select('benefit_status, stripe_subscription_id').eq('tenant_id', tenantId).maybeSingle();
     const { data, error } = await s.admin.rpc('founder_admin_action', { p_tenant: tenantId, p_admin: s.user.id, p_action: action, p_reason: reason || '' });
-    if (error) return NextResponse.json({ error: error.message }, { status: 409 });
+    if (error) {
+      // La BD deshace su propia transacción al bloquear: el intento se registra aquí, fuera de ella
+      await s.admin.from('activity_log').insert({
+        tenant_id: tenantId, user_id: s.user.id, action: 'founder.admin_blocked', entity: 'founder_benefit',
+        metadata: { action, reason: reason || '', error: error.message, benefit_status: before?.benefit_status || null },
+      });
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     // Al revocar un descuento activo se retira también el cupón en Stripe
     if (action === 'revoke' && before?.benefit_status === 'active' && before.stripe_subscription_id) {
       try {
