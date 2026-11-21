@@ -14,6 +14,14 @@ SaaS multi-tenant de reservas (Next.js 14 + Supabase + Stripe + Resend + YCloud 
 - Migración: public/migration-fundadores.sql (YA EJECUTADA). Pruebas: scripts/test-fundadores.mjs (33/33; cambia launch_at temporalmente: usar solo con permiso).
 - Tarea programada: .emergent/crons.yml → /api/cron/founders cada 15 min (Bearer WEBHOOK_CRON_SECRET o ?secret=CRON_SECRET).
 
+## CRM Comercial (Fase 2, nov 2026)
+- Super Admin → Growth Engine → CRM Comercial: Dashboard (cifras reales), Leads (búsqueda, filtros, orden, paginación, CSV), Pipeline Kanban (11 etapas; arrastrar o menú "Mover a"), Tareas, Actividades, ficha del lead.
+- Tablas nuevas (migration-crm.sql, YA EJECUTADA): crm_leads, crm_activities y crm_stage_history (solo se añade), crm_tasks, crm_privacy_requests, crm_suppressions (hash). Lectura RLS solo para super_admin; escritura solo desde el servidor.
+- Sincronización de solo lectura con tenants: crea un lead por negocio registrado (source app_signup, vinculado) y ajusta la etapa a Registro FREE / Cliente PRO / Cliente Business según la suscripción real. Si hay coincidencia ambigua, queda para revisión manual. Nunca modifica tenants, planes ni pagos.
+- RGPD: base jurídica, origen documentado, consentimiento, preferencias, oposición, supresión = anonimizar + lista de no contactar.
+- Preparado para fases 3-6: source/external_source_id (Meta, Google Places), score/ai_summary (IA), preferencias comm_* (Resend/WhatsApp con consentimiento).
+- Pruebas: scripts/test-crm.mjs (37/37).
+
 ## Pendiente / siguientes pasos
 - Producción: tras publicar, pulsar "Configurar Stripe ahora" (Super Admin → Planes) para añadir el evento invoice.paid al webhook live.
 - Definir la fecha de lanzamiento en el panel de Super Admin.
