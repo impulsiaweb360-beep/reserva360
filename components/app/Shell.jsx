@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Calendar, LayoutDashboard, Users, Briefcase, UserRound, Settings, LogOut, BarChart3, CreditCard, Building2, Shield, ChevronDown, RefreshCw, Bell, X, LifeBuoy } from 'lucide-react';
+import { Calendar, LayoutDashboard, Users, Briefcase, UserRound, Settings, LogOut, BarChart3, CreditCard, Building2, Shield, ChevronDown, RefreshCw, Bell, X, LifeBuoy, Award, Rocket } from 'lucide-react';
 import TenantLogo from '@/components/app/TenantLogo';
 
 const SIDEBAR_BY_ROLE = {
@@ -14,6 +14,7 @@ const SIDEBAR_BY_ROLE = {
     { id: 'sa_tenants', label: 'Tenants', icon: Building2 },
     { id: 'sa_plans', label: 'Planes', icon: CreditCard },
     { id: 'sa_analytics', label: 'Analíticas', icon: BarChart3 },
+    { id: 'sa_founders', label: 'Usuarios Fundadores', icon: Rocket, group: 'Growth Engine' },
   ],
   tenant_admin: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,6 +25,7 @@ const SIDEBAR_BY_ROLE = {
     { id: 'services', label: 'Servicios', icon: Briefcase },
     { id: 'payments', label: 'Pagos', icon: CreditCard },
     { id: 'settings', label: 'Configuración', icon: Settings },
+    { id: 'founder', label: 'Mi beneficio fundador', icon: Award },
     { id: 'help', label: 'Ayuda', icon: LifeBuoy },
   ],
   employee: [
@@ -82,16 +84,21 @@ export default function Shell({ active, setActive, children }) {
         )}
 
         <nav className="flex-1 space-y-0.5 p-3">
-          {items.map((it) => {
+          {items.map((it, i) => {
             const Icon = it.icon;
             const isActive = active === it.id;
             return (
-              <button key={it.id} onClick={() => setActive(it.id)}
+              <div key={it.id}>
+              {it.group && it.group !== items[i - 1]?.group && (
+                <div className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{it.group}</div>
+              )}
+              <button onClick={() => setActive(it.id)}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
                   isActive ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
                 }`}>
                 <Icon className="h-4 w-4" /> {it.label}
               </button>
+              </div>
             );
           })}
         </nav>

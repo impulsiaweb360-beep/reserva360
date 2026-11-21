@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireTenant, errorResponse } from '@/lib/route-helpers';
 import { getUsage } from '@/lib/billing-server';
 import { isStripeConfigured } from '@/lib/stripe';
-import { effectivePlanId, isOnTrial, trialDaysLeft, LAUNCH_FREE_MODE } from '@/lib/plans';
+import { effectivePlanId, isOnTrial, trialDaysLeft, isLaunchFreeMode, getLaunchAt } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +14,8 @@ export async function GET(request) {
     const usage = await getUsage(a.admin, t);
     return NextResponse.json({
       stripeConfigured: isStripeConfigured(),
-      launchFreeMode: LAUNCH_FREE_MODE,
+      launchFreeMode: isLaunchFreeMode(),
+      launchAt: getLaunchAt(),
       planId: t.plan_id,
       effectivePlanId: effectivePlanId(t),
       onTrial: isOnTrial(t),

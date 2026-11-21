@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
+import { syncProgram } from '@/lib/founders';
 import { bootstrapUser } from './actions';
 import DashboardClient from './dashboard-client';
 
@@ -23,5 +24,6 @@ export default async function DashboardPage() {
     );
   }
 
-  return <DashboardClient profile={result.profile} tenant={result.tenant} />;
+  const program = await syncProgram(createSupabaseAdminClient());
+  return <DashboardClient profile={result.profile} tenant={result.tenant} launchAt={program?.launch_at || null} />;
 }

@@ -5,6 +5,7 @@ import { DEFAULT_TZ, addDaysStr, todayStr, localToUtc, formatWhenLong } from '@/
 import { getWhatsAppConfig, notifyAppointment } from '@/lib/whatsapp/notify';
 import { getBaseUrl } from '@/lib/base-url';
 import { planLimits } from '@/lib/plans';
+import { syncProgram } from '@/lib/founders';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +43,7 @@ export async function GET(request) {
   }
 
   const supabase = createSupabaseAdminClient();
+  await syncProgram(supabase);
 
   // Ventana: todas las citas de MAÑANA (hora local del negocio, Europa/Madrid por defecto).
   // El cron de Vercel se ejecuta una vez al día, así que cubrimos el día completo siguiente.

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { syncProgram } from '@/lib/founders';
 import { verifyYCloudSignature } from '@/lib/whatsapp/ycloud';
 import { getWhatsAppConfig } from '@/lib/whatsapp/notify';
 import { handleInbound } from '@/lib/whatsapp/bot';
@@ -15,6 +16,7 @@ export async function POST(request, { params }) {
   const { tenantId } = await params;
   const raw = await request.text();
   const supabase = createSupabaseAdminClient();
+  await syncProgram(supabase);
 
   const cfg = await getWhatsAppConfig(supabase, tenantId);
   if (!cfg) return NextResponse.json({ error: 'WhatsApp no conectado' }, { status: 404 });

@@ -6,6 +6,7 @@ import {
 } from '@/lib/billing-server';
 import { getBaseUrl } from '@/lib/base-url';
 import { notifyAppointment } from '@/lib/whatsapp/notify';
+import { syncProgram, activateFromSubscription, onSubscriptionEvent, onInvoicePaid, stripIfConsumed } from '@/lib/founders';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,7 @@ export async function POST(request) {
   if (dupErr && (dupErr.code === '23505' || /duplicate/i.test(dupErr.message))) return NextResponse.json({ received: true });
 
   const obj = event.data.object;
+  await syncProgram(supabase);
   try {
     switch (event.type) {
       case 'checkout.session.completed':
@@ -43,17 +45,30 @@ export async function POST(request) {
             } catch {}
           }
         } else if (obj.mode === 'subscription' && obj.subscription) {
-          const sub = await stripe.subscriptions.retrieve(obj.subscription);
+          const sub = await stripe.subscriptions.retrieve(typeof obj.subscription === 'string' ? obj.subscription : obj.subscription.id);
           await syncSubscription(supabase, sub);
+          // Fundadores: activa el beneficio reservado (idempotente)
+          await activateFromSubscription(supabase, stripe, sub);
         }
         break;
       case 'checkout.session.expired':
         if (obj.metadata?.r360_kind === 'appointment') await expireAppointmentPayment(supabase, obj);
+        // Fundadores: si el pago no se completó, se libera la reserva del beneficio
+        if (obj.metadata?.r360_founder === '1' && obj.metadata?.tenant_id) {
+          await supabase.rpc('founder_release', { p_tenant: obj.metadata.tenant_id, p_session: obj.id });
+        }
         break;
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
         await syncSubscription(supabase, obj);
+        await onSubscriptionEvent(supabase, stripe, obj, event.type);
+        if (event.type !== 'customer.subscription.deleted' && obj.metadata?.tenant_id) {
+          await stripIfConsumed(supabase, stripe, obj.metadata.tenant_id, obj);
+        }
+        break;
+      case 'invoice.paid':
+        await onInvoicePaid(supabase, stripe, obj);
         break;
       case 'invoice.payment_failed': {
         const subId = obj.subscription || obj.parent?.subscription_details?.subscription;

@@ -18,6 +18,9 @@ import AnalyticsView from '@/components/app/AnalyticsView';
 import SettingsView from '@/components/app/SettingsView';
 import EmployeeSchedule from '@/components/app/EmployeeSchedule';
 import HelpView from '@/components/app/HelpView';
+import FounderBenefitView from '@/components/app/FounderBenefitView';
+import FoundersAdminView from '@/components/app/FoundersAdminView';
+import { setLaunchAt } from '@/lib/plans';
 
 const DEFAULT_BY_ROLE = {
   super_admin: 'sa_dashboard',
@@ -60,6 +63,8 @@ function renderContent(view, session, setActive) {
   if (view === 'sa_tenants') return <TenantsList />;
   if (view === 'sa_plans') return <PlansView />;
   if (view === 'sa_analytics') return <AnalyticsView />;
+  if (view === 'sa_founders') return <FoundersAdminView />;
+  if (view === 'founder') return <FounderBenefitView onNavigate={(v) => { setActive(v); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); }} />;
   if (view === 'dashboard') return <TenantDashboard tenantId={session.tenantId} />;
   if (view === 'calendar') return <WeekCalendar tenantId={session.tenantId} />;
   if (view === 'appointments') return <AppointmentsList tenantId={session.tenantId} />;
@@ -75,7 +80,8 @@ function renderContent(view, session, setActive) {
   return <div>Sin contenido</div>;
 }
 
-export default function DashboardClient({ profile, tenant }) {
+export default function DashboardClient({ profile, tenant, launchAt }) {
+  setLaunchAt(launchAt); // el modo lanzamiento se cierra solo en la fecha oficial
   return (
     <SupabaseAppProvider initialProfile={profile} initialTenant={tenant}>
       <AppShellInner />

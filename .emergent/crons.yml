@@ -1,0 +1,8 @@
+crons:
+  - name: founders-freeze
+    description: "Congela la elegibilidad de Usuarios Fundadores al llegar el lanzamiento y guarda la evaluacion"
+    cron: "*/15 * * * *"
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    endpoint: "{{BASE_URL}}/api/cron/founders"
+    method: POST
+    enabled: true

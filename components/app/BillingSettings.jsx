@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Check, Loader2, CreditCard, ExternalLink, AlertTriangle, Sparkles } from 'lucide-react';
-import { PLANS } from '@/lib/plans';
+import { Check, Loader2, CreditCard, ExternalLink, AlertTriangle, Sparkles, Award } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { PLANS, founderPrice, FOUNDER_DISCOUNT, FOUNDER_CYCLES } from '@/lib/plans';
 import { track } from '@/lib/analytics';
 
 const eur = (n) => `${Number(n).toLocaleString('es-ES', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
@@ -15,10 +18,14 @@ export default function BillingSettings() {
   const [s, setS] = useState(null);
   const [interval, setInterval_] = useState('month');
   const [busy, setBusy] = useState(null);
+  const [f, setF] = useState(null); // beneficio fundador (calculado en servidor)
+  const [confirm, setConfirm] = useState(null); // plan pendiente de confirmar con precio fundador
 
   const load = async () => {
     const r = await fetch('/api/billing/status');
     setS(r.ok ? await r.json() : { error: (await r.json().catch(() => ({}))).error || 'Error' });
+    const fr = await fetch('/api/founders/me').catch(() => null);
+    setF(fr?.ok ? await fr.json() : null);
   };
 
   useEffect(() => {
@@ -29,7 +36,7 @@ export default function BillingSettings() {
         const r = await fetch(`/api/billing/verify?session_id=${encodeURIComponent(sessionId)}`);
         const j = await r.json().catch(() => ({}));
         if (j.ok) {
-          toast.success('¡Suscripción activada! Gracias por confiar en Reserva360.');
+          toast.success(j.founder ? `¡Suscripción activada con tu ${FOUNDER_DISCOUNT} % de fundador!` : '¡Suscripción activada! Gracias por confiar en Reserva360.');
           track('subscription_purchase', { plan: j.planId || 'desconocido', currency: 'EUR' });
         }
       } else if (sp.get('billing') === 'cancelled') {
@@ -60,6 +67,7 @@ export default function BillingSettings() {
   const current = s.effectivePlanId;
   const paid = ['active', 'trialing', 'past_due'].includes(s.subscription?.status);
   const lim = s.usage?.limits || {};
+  const founderOn = Boolean(f?.willApplyOnCheckout) && !paid && !s.launchFreeMode;
 
   return (
     <div className="space-y-4" data-testid="billing-settings">
@@ -84,9 +92,23 @@ export default function BillingSettings() {
             <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800" data-testid="billing-launch-mode">
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                <b>Gratis durante el lanzamiento.</b> Tienes todas las funciones del plan Pro sin pagar nada. Cuando abramos oficialmente,
-                te avisaremos con antelación y tendrás un 30 % de descuento durante tus 3 primeros meses.
+                <b>Gratis durante el lanzamiento.</b> Tienes todas las funciones del plan Pro sin pagar nada.{' '}
+                {f?.status === 'eligible'
+                  ? <>Ya eres elegible como <b>usuario fundador</b>: tendrás un {FOUNDER_DISCOUNT} % de descuento durante tus {FOUNDER_CYCLES} primeros ciclos pagados.</>
+                  : <>Completa la configuración de tu negocio antes del lanzamiento para conseguir un {FOUNDER_DISCOUNT} % de descuento como <b>usuario fundador</b> (mira «Mi beneficio fundador»).</>}
               </span>
+            </div>
+          )}
+          {founderOn && (
+            <div className="flex items-start gap-2 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-900" data-testid="billing-founder-banner">
+              <Award className="mt-0.5 h-4 w-4 shrink-0" />
+              <span><b>Precio de fundador:</b> {FOUNDER_DISCOUNT} % de descuento en tus {FOUNDER_CYCLES} primeros pagos mensuales (o en el primer año si eliges anual). Después, precio normal.</span>
+            </div>
+          )}
+          {f?.status === 'active' && paid && (
+            <div className="flex items-start gap-2 rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-900">
+              <Award className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>Descuento fundador activo: te quedan <b>{f.cyclesLeft}</b> {f.cyclesLeft === 1 ? 'ciclo pagado' : 'ciclos pagados'} con el {FOUNDER_DISCOUNT} %. Si cambias de plan lo mantienes.</span>
             </div>
           )}
           {s.onTrial && (
@@ -132,16 +154,28 @@ export default function BillingSettings() {
             {PLANS.map((p) => {
               const isCurrent = p.id === current && (p.key === 'free' ? !paid : paid || s.onTrial || s.launchFreeMode);
               const price = interval === 'year' ? p.yearly : p.monthly;
+              const fPrice = founderOn && p.key !== 'free' ? founderPrice(price) : null;
               return (
                 <div key={p.id} data-testid={`plan-card-${p.key}`}
                   className={`relative flex flex-col rounded-xl border p-5 ${p.popular ? 'border-indigo-500 ring-1 ring-indigo-500' : ''}`}>
                   {p.popular && <Badge className="absolute -top-2.5 left-4 bg-indigo-600">Más popular</Badge>}
                   <div className="text-lg font-bold">{p.name}</div>
                   <div className="text-xs text-slate-500">{p.tagline}</div>
+                  {fPrice != null ? (
+                    <div className="my-3" data-testid={`plan-founder-price-${p.key}`}>
+                      <span className="text-3xl font-extrabold text-indigo-700">{eur(fPrice)}</span>
+                      <span className="text-sm text-slate-500">{interval === 'year' ? ' el 1.er año' : ' /mes'}</span>
+                      <span className="ml-2 text-sm text-slate-400 line-through">{eur(price)}</span>
+                      <div className="text-xs text-slate-500">
+                        {interval === 'year' ? `Después ${eur(price)}/año` : `Durante ${FOUNDER_CYCLES} pagos, después ${eur(price)}/mes`}
+                      </div>
+                    </div>
+                  ) : (
                   <div className="my-3">
                     <span className="text-3xl font-extrabold">{eur(price)}</span>
                     <span className="text-sm text-slate-500">{p.key === 'free' ? '' : interval === 'year' ? ' /año' : ' /mes'}</span>
                   </div>
+                  )}
                   <ul className="mb-4 flex-1 space-y-1.5 text-sm">
                     {p.features.map((f) => (
                       <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />{f}</li>
@@ -160,7 +194,9 @@ export default function BillingSettings() {
                     </Button>
                   ) : (
                     <Button data-testid={`plan-subscribe-${p.key}`} disabled={!!busy || !s.stripeConfigured || s.migrationNeeded}
-                      onClick={() => go(p.key, '/api/billing/checkout', { plan: p.key, interval })}>
+                      onClick={() => (fPrice != null
+                        ? setConfirm({ key: p.key, name: p.name, price, fPrice, interval })
+                        : go(p.key, '/api/billing/checkout', { plan: p.key, interval }))}>
                       {busy === p.key && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
                       Suscribirme a {p.name}
                     </Button>
@@ -177,6 +213,35 @@ export default function BillingSettings() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!confirm} onOpenChange={(o) => { if (!o) setConfirm(null); }}>
+        <AlertDialogContent data-testid="founder-confirm-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirma tu precio de fundador</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm text-slate-600">
+                {confirm && (
+                  <>
+                    <p>Plan <b>{confirm.name}</b> {confirm.interval === 'year' ? 'anual' : 'mensual'}:</p>
+                    <ul className="list-disc space-y-1 pl-5">
+                      <li>Precio promocional: <b>{eur(confirm.fPrice)}{confirm.interval === 'year' ? ' el primer año' : '/mes'}</b> ({FOUNDER_DISCOUNT} % de descuento).</li>
+                      <li>Duración: {confirm.interval === 'year' ? 'el primer pago anual' : `tus ${FOUNDER_CYCLES} primeros pagos mensuales`}.</li>
+                      <li>Después: <b>{eur(confirm.price)}{confirm.interval === 'year' ? '/año' : '/mes'}</b> (precio normal vigente).</li>
+                    </ul>
+                    <p className="text-xs">El beneficio es único por negocio: si cancelas durante la promoción, pierdes los ciclos con descuento que te queden.</p>
+                  </>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Volver</AlertDialogCancel>
+            <AlertDialogAction data-testid="founder-confirm-continue" onClick={() => { const c = confirm; setConfirm(null); go(c.key, '/api/billing/checkout', { plan: c.key, interval: c.interval }); }}>
+              Continuar al pago
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Card data-testid="connect-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">

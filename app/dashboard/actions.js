@@ -1,7 +1,8 @@
 'use server';
 
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
-import { LAUNCH_FREE_MODE } from '@/lib/plans';
+import { isLaunchFreeMode } from '@/lib/plans';
+import { syncProgram } from '@/lib/founders';
 import { Resend } from 'resend';
 
 const ADMIN_NOTIFY_EMAIL = 'reserva360.app@gmail.com';
@@ -84,6 +85,7 @@ export async function bootstrapUser() {
   // Si profile no tiene tenant_id Y rol es tenant_admin → crear tenant
   if (!profile.tenant_id && profile.role === 'tenant_admin') {
     const admin = createSupabaseAdminClient();
+    await syncProgram(admin);
     const meta = user.user_metadata || {};
     const businessName = meta.business_name || `Negocio de ${profile.first_name || profile.email}`;
     const slug = (meta.business_name || profile.email.split('@')[0])
@@ -114,7 +116,7 @@ export async function bootstrapUser() {
       business_hours: businessHours,
       vacations: [],
       // Modo lanzamiento: sin prueba de 14 días (todos tienen Pro gratis). Fuera de él: 14 días de Pro gratis
-      trial_ends_at: LAUNCH_FREE_MODE ? null : new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
+      trial_ends_at: isLaunchFreeMode() ? null : new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
     };
     let { data: newTenant, error: tErr } = await admin.from('tenants').insert(tenantRow).select().single();
     if (tErr && /trial_ends_at|plan_free|foreign key/i.test(tErr.message)) {

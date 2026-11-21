@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireTenant, errorResponse } from '@/lib/route-helpers';
 import { getStripe } from '@/lib/stripe';
 import { syncSubscription } from '@/lib/billing-server';
+import { activateFromSubscription } from '@/lib/founders';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,9 @@ export async function GET(request) {
     if (session.status !== 'complete' || !session.subscription) return NextResponse.json({ ok: false, status: session.status });
     const sub = await stripe.subscriptions.retrieve(typeof session.subscription === 'string' ? session.subscription : session.subscription.id);
     const r = await syncSubscription(a.admin, sub);
-    return NextResponse.json({ ok: true, planId: r?.plan_id, status: sub.status });
+    // Fundadores: respaldo por si el webhook aún no llegó (idempotente)
+    const founder = await activateFromSubscription(a.admin, stripe, sub).catch((e) => { console.error('[founder verify]', e); return null; });
+    return NextResponse.json({ ok: true, planId: r?.plan_id, status: sub.status, founder: founder === 'activated' || founder === 'already' });
   } catch (e) {
     return errorResponse(e);
   }
