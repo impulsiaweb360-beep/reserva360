@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Calendar, LayoutDashboard, Users, Briefcase, UserRound, Settings, LogOut, BarChart3, CreditCard, Building2, Shield, ChevronDown, RefreshCw, Bell, X, LifeBuoy, Award, Rocket, Contact } from 'lucide-react';
+import { Calendar, LayoutDashboard, Users, Briefcase, UserRound, Settings, LogOut, BarChart3, CreditCard, Building2, Shield, ChevronDown, RefreshCw, Bell, X, LifeBuoy, Award, Rocket, Contact, Inbox } from 'lucide-react';
 import TenantLogo from '@/components/app/TenantLogo';
 
 const SIDEBAR_BY_ROLE = {
@@ -16,6 +16,7 @@ const SIDEBAR_BY_ROLE = {
     { id: 'sa_analytics', label: 'Analíticas', icon: BarChart3 },
     { id: 'sa_founders', label: 'Usuarios Fundadores', icon: Rocket, group: 'Growth Engine' },
     { id: 'sa_crm', label: 'CRM Comercial', icon: Contact, group: 'Growth Engine' },
+    { id: 'sa_capture', label: 'Captación', icon: Inbox, group: 'Growth Engine' },
   ],
   tenant_admin: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },

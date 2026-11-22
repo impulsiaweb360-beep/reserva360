@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import MarketingHeader from './MarketingHeader';
 import MarketingFooter from './MarketingFooter';
+import LeadCaptureForm from './LeadCaptureForm';
 import { PrimaryCta, SecondaryCta, CtaNote } from './CtaButtons';
 import { EarlyAccessCard } from './EarlyAccess';
 import { BrowserShot, PhoneShot } from './Screenshot';
@@ -323,6 +324,20 @@ export default function Landing() {
               ¿Tienes otra duda? Lee nuestro <Link href="/blog" className="font-medium text-indigo-600 hover:underline">blog</Link> o escríbenos a{' '}
               <a href="mailto:reserva360.app@gmail.com" className="font-medium text-indigo-600 hover:underline">reserva360.app@gmail.com</a>.
             </p>
+          </div>
+        </section>
+
+        {/* CAPTACIÓN: solicitud de información o demo */}
+        <section id="contacto" aria-labelledby="contacto-titulo" className="scroll-mt-24 bg-slate-50 py-16 md:py-24">
+          <div className="container mx-auto grid max-w-6xl gap-10 px-4 md:px-6 lg:grid-cols-[1fr_1.4fr]">
+            <div>
+              <h2 id="contacto-titulo" className="text-3xl font-bold tracking-tight md:text-4xl">¿Quieres verlo con tu negocio?</h2>
+              <p className="mt-4 text-lg text-slate-700">Pídenos información o una demostración gratuita de 20 minutos. Te respondemos en menos de 24 horas laborables.</p>
+              <p className="mt-4 text-sm text-slate-600">¿Prefieres probarlo ya? Elige «Quiero empezar gratis» y te llevamos al registro.</p>
+            </div>
+            <div className="relative rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+              <LeadCaptureForm defaultRequest="demo" page="/" idPrefix="home" compact />
+            </div>
           </div>
         </section>
 

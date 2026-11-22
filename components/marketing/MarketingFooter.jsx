@@ -35,6 +35,8 @@ export default function MarketingFooter() {
             <li><Link href="/#funcionalidades" className="hover:text-indigo-700">Funcionalidades</Link></li>
             <li><Link href="/#precios" className="hover:text-indigo-700">Precios</Link></li>
             <li><Link href="/#faq" className="hover:text-indigo-700">Preguntas frecuentes</Link></li>
+            <li><Link href="/demo" className="hover:text-indigo-700">Solicitar una demo</Link></li>
+            <li><Link href="/contacto" className="hover:text-indigo-700">Contacto</Link></li>
             <li><Link href={SIGNUP_PATH} className="hover:text-indigo-700">Crear cuenta</Link></li>
             <li><Link href={LOGIN_PATH} className="hover:text-indigo-700">Iniciar sesión</Link></li>
           </ul>
@@ -44,6 +46,8 @@ export default function MarketingFooter() {
         <div className="container mx-auto flex flex-col items-center justify-between gap-3 px-4 py-6 text-xs text-slate-500 md:flex-row md:px-6">
           <p>© {new Date().getFullYear()} Reserva360</p>
           <div className="flex items-center gap-4">
+            <Link href="/contacto" className="hover:text-slate-800">Contacto</Link>
+            <Link href="/privacidad" className="hover:text-slate-800">Política de privacidad</Link>
             <Link href="/cookies" className="hover:text-slate-800">Política de cookies</Link>
             <CookieSettingsButton className="hover:text-slate-800" />
           </div>

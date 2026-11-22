@@ -21,6 +21,7 @@ import HelpView from '@/components/app/HelpView';
 import FounderBenefitView from '@/components/app/FounderBenefitView';
 import FoundersAdminView from '@/components/app/FoundersAdminView';
 import CRMView from '@/components/app/crm/CRMView';
+import CaptureView from '@/components/app/capture/CaptureView';
 import { setLaunchAt } from '@/lib/plans';
 
 const DEFAULT_BY_ROLE = {
@@ -66,6 +67,7 @@ function renderContent(view, session, setActive) {
   if (view === 'sa_analytics') return <AnalyticsView />;
   if (view === 'sa_founders') return <FoundersAdminView />;
   if (view === 'sa_crm') return session.role === 'super_admin' ? <CRMView /> : null;
+  if (view === 'sa_capture') return session.role === 'super_admin' ? <CaptureView /> : null;
   if (view === 'founder') return <FounderBenefitView onNavigate={(v) => { setActive(v); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); }} />;
   if (view === 'dashboard') return <TenantDashboard tenantId={session.tenantId} />;
   if (view === 'calendar') return <WeekCalendar tenantId={session.tenantId} />;

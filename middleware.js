@@ -45,5 +45,5 @@ export async function middleware(request) {
 
 export const config = {
   // Las páginas públicas de marketing (home, sectores, blog, SEO) no necesitan sesión: se excluyen para cargar más rápido
-  matcher: ['/((?!$|_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|robots.txt|sitemap.xml|brand/|og/|screenshots/|blog|cookies|software-|programa-|agenda-|logo-reserva360.png|reserva360-supabase-schema.sql|reserva360-storage-policies.sql|book/|manage/|api/public/|api/cron/).*)'],
+  matcher: ['/((?!$|_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|robots.txt|sitemap.xml|brand/|og/|screenshots/|blog|cookies|contacto|demo|privacidad|software-|programa-|agenda-|logo-reserva360.png|reserva360-supabase-schema.sql|reserva360-storage-policies.sql|book/|manage/|api/public/|api/cron/|api/capture/|api/meta/).*)'],
 };

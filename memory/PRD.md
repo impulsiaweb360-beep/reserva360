@@ -26,3 +26,14 @@ SaaS multi-tenant de reservas (Next.js 14 + Supabase + Stripe + Resend + YCloud 
 - Producción: tras publicar, pulsar "Configurar Stripe ahora" (Super Admin → Planes) para añadir el evento invoice.paid al webhook live.
 - Definir la fecha de lanzamiento en el panel de Super Admin.
 - Textos de marketing que dicen "gratis durante el lanzamiento" no cambian solos tras la fecha.
+
+## Fase 3 — Captación automática de leads (nov 2026) ✅
+- Formulario público reutilizable (components/marketing/LeadCaptureForm.jsx) en home (#contacto), /contacto y /demo. Página /privacidad (datos legales editables en Super Admin → Captación → Canales).
+- Consentimientos separados y no premarcados (gestión obligatoria; email y WhatsApp opcionales); versión de textos lib/crm/consent.js (CONSENT_VERSION) guardada con fecha y origen en crm_leads.metadata.last_capture.consents.
+- Antispam: SOLO protección invisible (decisión del usuario): honeypot «website», tiempo mínimo 3 s, 5 envíos/10 min por IP (hash), 3/h por email, Origin propio. Turnstile implementado pero inactivo (se activa si existen NEXT_PUBLIC_TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY).
+- Tabla nueva crm_capture_events (idempotencia por (channel, external_id) e idempotency_key; métricas; sin datos personales). Tipo de actividad 'capture' añadido a crm_activities. Ajustes en platform_settings: capture_channels, legal_info, meta_status, meta_verify_token, capture_salt.
+- Duplicados: mismo email → actualiza solo campos vacíos + actividad; mismo email con otro nombre y negocio → revisión manual; solo mismo teléfono → lead nuevo + revisión. Nunca fusiona. Suprimidos que vuelven por iniciativa propia → se acepta (decisión del usuario).
+- Meta Lead Ads (Graph v27.0): /api/meta/webhook (verificación hub.challenge + firma X-Hub-Signature-256), descarga del lead, fb/ig, campaña/conjunto/anuncio, reintentos (cron capture-retry */15). Estado REAL: PENDIENTE DE CONFIGURACIÓN (faltan META_APP_ID, META_APP_SECRET, META_PAGE_ID, META_PAGE_ACCESS_TOKEN).
+- Super Admin → Growth Engine → Captación: Resumen (métricas con filtros), Canales (web/Facebook/Instagram, toggles, prueba, conexión Meta, datos legales), Eventos, Revisión.
+- Pruebas: scripts/test-captacion.mjs 54/54; testing agent 15/15.
+- Pendiente: credenciales de Meta + app en modo desarrollo; completar NIF/dirección en datos legales; si se aloja en Vercel, copiar allí las variables de entorno y crear el cron de reintentos.
