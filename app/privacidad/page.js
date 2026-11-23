@@ -3,6 +3,7 @@ import MarketingFooter from '@/components/marketing/MarketingFooter';
 import { pageMetadata } from '@/lib/site';
 import { getLegalInfo, DEFAULT_LEGAL, captureAdminClient } from '@/lib/crm/capture';
 import { CONSENT_VERSION } from '@/lib/crm/consent';
+import { turnstileConfigured } from '@/lib/crm/turnstile'; // la mención a Cloudflare solo aparece si se activa
 
 export const revalidate = 600;
 export const metadata = pageMetadata({
@@ -48,7 +49,7 @@ export default async function PrivacidadPage() {
         <p className={P}>Mientras gestionamos tu solicitud y, después, durante un máximo de 24 meses desde el último contacto si no llegas a ser cliente, salvo que antes pidas su supresión. Si te opones a las comunicaciones comerciales, conservamos lo mínimo imprescindible para respetar tu decisión (lista de no contactar).</p>
 
         <h2 className={H2}>5. Destinatarios y proveedores</h2>
-        <p className={P}>No vendemos ni cedemos tus datos a terceros, salvo obligación legal. Usamos proveedores que tratan datos por nuestra cuenta con las garantías del RGPD: alojamiento y base de datos (Supabase, Vercel), protección antispam (Cloudflare Turnstile, que analiza señales técnicas del navegador para detectar bots) y, si nos contactas mediante anuncios, Meta Platforms (Facebook e Instagram) como plataforma del formulario. Algunos pueden implicar transferencias internacionales amparadas en el Marco de Privacidad de Datos UE-EE. UU. o cláusulas contractuales tipo.</p>
+        <p className={P}>No vendemos ni cedemos tus datos a terceros, salvo obligación legal. Usamos proveedores que tratan datos por nuestra cuenta con las garantías del RGPD: alojamiento y base de datos (Supabase, Vercel){turnstileConfigured() ? ', protección antispam (Cloudflare Turnstile, que analiza señales técnicas del navegador para detectar bots)' : ''} y, si nos contactas mediante anuncios, Meta Platforms (Facebook e Instagram) como plataforma del formulario. Algunos pueden implicar transferencias internacionales amparadas en el Marco de Privacidad de Datos UE-EE. UU. o cláusulas contractuales tipo.</p>
 
         <h2 className={H2}>6. Tus derechos</h2>
         <p className={P}>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad, y retirar tu consentimiento, escribiendo a <a className="text-indigo-600 hover:underline" href={`mailto:${L.email}`}>{L.email}</a>. Para eliminar tus datos, consulta el <a className="text-indigo-600 hover:underline" href="#eliminacion-datos">apartado 8</a>. Si consideras que no hemos atendido bien tu solicitud, puedes reclamar ante la Agencia Española de Protección de Datos (<a className="text-indigo-600 hover:underline" href="https://www.aepd.es" rel="noopener noreferrer" target="_blank">aepd.es</a>).</p>
