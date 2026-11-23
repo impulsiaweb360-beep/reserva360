@@ -5,6 +5,7 @@ import { retryFailedMetaEvents, metaConfig } from '@/lib/crm/meta';
 import { captureAdminClient } from '@/lib/crm/capture';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // límite de Vercel Hobby
 
 const safeEq = (a, b) => {
   const x = Buffer.from(String(a || ''));
@@ -22,9 +23,19 @@ function authorized(request) {
 async function handler(request) {
   // Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
   if (!authorized(request)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  if (metaConfig().configured) {
-    retryFailedMetaEvents(captureAdminClient()).catch((e) => console.error('[cron capture-retry]', e?.message));
+  if (!metaConfig().configured) return NextResponse.json({ accepted: true, skipped: 'Meta no configurado' }, { status: 202 });
+  // En Vercel (serverless) el trabajo en segundo plano se corta al responder: se espera al resultado con un lote pequeño
+  if (process.env.VERCEL) {
+    try {
+      const out = await retryFailedMetaEvents(captureAdminClient(), { limit: 5 });
+      console.log(JSON.stringify({ tag: 'meta_webhook', stage: 'cron_retry', retried: out.length, results: out.map((r) => r.status) }));
+      return NextResponse.json({ ok: true, retried: out.length }, { status: 200 });
+    } catch (e) {
+      console.log(JSON.stringify({ tag: 'meta_webhook', stage: 'cron_retry', error: String(e?.message || e).slice(0, 200) }));
+      return NextResponse.json({ error: 'Error al reintentar' }, { status: 500 });
+    }
   }
+  retryFailedMetaEvents(captureAdminClient()).catch((e) => console.error('[cron capture-retry]', e?.message));
   return NextResponse.json({ accepted: true }, { status: 202 });
 }
 export const POST = handler;
