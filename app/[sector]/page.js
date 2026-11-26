@@ -103,6 +103,15 @@ export default function SectorPage({ params }) {
                   pueden reservar, consultar, cambiar o cancelar sus citas con menús y botones. Además reciben por WhatsApp la confirmación de la cita, el recordatorio
                   24 horas antes y los avisos de cita cambiada o cancelada, y tú un aviso de cada reserva nueva.
                 </p>
+                {/* Enlace interno a la landing del asistente de WhatsApp (refuerzo SEO) */}
+                <Link
+                  href="/asistente-virtual-reservas-whatsapp"
+                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline"
+                  data-testid="sector-whatsapp-link"
+                >
+                  Ver cómo funciona el asistente de reservas por WhatsApp
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
               </div>
             </div>
           </div>
@@ -172,6 +181,7 @@ export default function SectorPage({ params }) {
                 ))}
               </ul>
               <p className="mt-4 text-sm"><Link href="/" className="font-medium text-indigo-700 hover:underline">Ver todas las funcionalidades de Reserva360</Link></p>
+              <p className="mt-2 text-sm"><Link href="/asistente-virtual-reservas-whatsapp" className="font-medium text-indigo-700 hover:underline">Asistente virtual de reservas por WhatsApp para {s.name.toLowerCase()}</Link></p>
             </div>
             <div>
               <h2 className="text-xl font-bold">Artículos que te pueden interesar</h2>

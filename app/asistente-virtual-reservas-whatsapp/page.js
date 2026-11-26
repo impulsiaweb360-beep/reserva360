@@ -101,7 +101,7 @@ function ChatMockup() {
 
 export default function WhatsAppAssistantPage() {
   const sectors = SECTORS.filter((s) => ['software-reservas-barberias', 'programa-citas-peluquerias', 'software-reservas-centros-estetica', 'software-reservas-fisioterapeutas', 'software-gestion-clinicas'].includes(s.slug));
-  const posts = ['mejores-apps-gestion-citas-control-reservas', 'que-debe-tener-programa-gestion-citas', 'como-reducir-ausencias-clientes-clinica'].map(getPost).filter(Boolean);
+  const posts = ['reducir-ausencias-recordatorios-whatsapp', 'mejores-apps-gestion-citas-control-reservas', 'que-debe-tener-programa-gestion-citas', 'como-reducir-ausencias-clientes-clinica'].map(getPost).filter(Boolean);
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
