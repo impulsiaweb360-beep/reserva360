@@ -16,15 +16,63 @@ export const generateStaticParams = () => POSTS.map((p) => ({ slug: p.slug }));
 export function generateMetadata({ params }) {
   const p = getPost(params.slug);
   if (!p) return {};
-  return pageMetadata({ title: `${p.title} | Reserva360`, description: p.description, path: `/blog/${p.slug}`, type: 'article', publishedTime: p.date });
+  // seoTitle / seoDescription opcionales: permiten un title y meta description distintos del H1
+  return pageMetadata({
+    title: p.seoTitle || `${p.title} | Reserva360`,
+    description: p.seoDescription || p.description,
+    path: `/blog/${p.slug}`,
+    type: 'article',
+    publishedTime: p.date,
+    ...(p.updated ? { modifiedTime: p.updated } : {}),
+  });
+}
+
+// Texto con enlaces internos: un string o un array de partes (string | { href, text } | { strong })
+function Inline({ v }) {
+  if (!Array.isArray(v)) return v;
+  return v.map((part, i) => {
+    if (typeof part === 'string') return <span key={i}>{part}</span>;
+    if (part?.strong) return <strong key={i}>{part.strong}</strong>;
+    return <Link key={i} href={part.href} className="font-medium text-indigo-700 underline decoration-indigo-200 underline-offset-2 hover:decoration-indigo-600">{part.text}</Link>;
+  });
 }
 
 function Block({ b }) {
   const [type, v] = b;
-  if (type === 'h2') return <h2 className="mt-10 text-2xl font-bold tracking-tight">{v}</h2>;
-  if (type === 'p') return <p className="mt-4 leading-relaxed text-slate-700">{v}</p>;
-  if (type === 'ul') return <ul className="mt-4 list-disc space-y-2 pl-6 text-slate-700">{v.map((x) => <li key={x}>{x}</li>)}</ul>;
-  if (type === 'ol') return <ol className="mt-4 list-decimal space-y-2 pl-6 text-slate-700">{v.map((x) => <li key={x}>{x}</li>)}</ol>;
+  if (type === 'h2') return <h2 id={b[2]} className="mt-10 scroll-mt-24 text-2xl font-bold tracking-tight">{v}</h2>;
+  if (type === 'h3') return <h3 className="mt-6 text-lg font-semibold">{v}</h3>;
+  if (type === 'p') return <p className="mt-4 leading-relaxed text-slate-700"><Inline v={v} /></p>;
+  if (type === 'ul') return <ul className="mt-4 list-disc space-y-2 pl-6 text-slate-700">{v.map((x, i) => <li key={i}><Inline v={x} /></li>)}</ul>;
+  if (type === 'ol') return <ol className="mt-4 list-decimal space-y-2 pl-6 text-slate-700">{v.map((x, i) => <li key={i}><Inline v={x} /></li>)}</ol>;
+  if (type === 'table') {
+    return (
+      <figure className="mt-6">
+        {v.caption && <figcaption className="mb-3 text-sm font-semibold text-slate-900">{v.caption}</figcaption>}
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full min-w-[520px] text-left text-sm">
+            <thead className="bg-slate-50 text-slate-900">
+              <tr>{v.head.map((h) => <th key={h} scope="col" className="px-4 py-3 font-semibold">{h}</th>)}</tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-slate-700">
+              {v.rows.map((r, i) => (
+                <tr key={i}>{r.map((c, j) => (j === 0
+                  ? <th key={j} scope="row" className="px-4 py-3 font-medium text-slate-900">{c}</th>
+                  : <td key={j} className="px-4 py-3 align-top"><Inline v={c} /></td>))}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </figure>
+    );
+  }
+  if (type === 'cta') {
+    return (
+      <aside className="mt-6 flex flex-col gap-3 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+        <p>{v.text}</p>
+        <Link href={v.href} className="shrink-0 font-semibold text-indigo-700 hover:underline">{v.label} →</Link>
+      </aside>
+    );
+  }
   if (type === 'tip') {
     return (
       <aside className="mt-6 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
@@ -47,7 +95,7 @@ export default function PostPage({ params }) {
     headline: p.title,
     description: p.description,
     datePublished: p.date,
-    dateModified: p.date,
+    dateModified: p.updated || p.date,
     inLanguage: 'es-ES',
     mainEntityOfPage: absoluteUrl(`/blog/${p.slug}`),
     author: { '@type': 'Organization', name: SITE_NAME, url: absoluteUrl('/') },
@@ -70,7 +118,7 @@ export default function PostPage({ params }) {
         </nav>
 
         <div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <article className="max-w-3xl">
+          <article className="min-w-0 max-w-3xl">
             <header>
               <h1 className="text-3xl font-extrabold leading-tight tracking-tight md:text-5xl">{p.title}</h1>
               <p className="mt-4 text-lg text-slate-600">{p.description}</p>

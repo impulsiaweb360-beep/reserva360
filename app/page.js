@@ -2,9 +2,9 @@ import Landing from '@/components/marketing/Landing';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata = pageMetadata({
-  title: 'Software de gestión de citas y reservas online | Reserva360',
+  title: 'Reserva360 | App de gestión de citas y reservas por WhatsApp',
   description:
-    'Programa de reservas online para negocios con cita previa: agenda por profesional, reservas 24 h, recordatorios automáticos, clientes y empleados en una sola plataforma.',
+    'App y software de gestión de citas, control de reservas y asistente virtual por WhatsApp 24/7. Reduce ausencias en tu negocio. Prueba Reserva360.',
   path: '/',
 });
 

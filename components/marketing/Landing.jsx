@@ -68,13 +68,13 @@ export default function Landing() {
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" /> {EARLY_ACCESS.badge}: {EARLY_ACCESS.short.toLowerCase()}
               </p>
               <h1 className="mt-5 text-4xl font-extrabold tracking-tight md:text-6xl">
-                Software de gestión de citas y{' '}
-                <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">reservas online</span>{' '}
+                App de gestión de citas y{' '}
+                <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">control de reservas</span>{' '}
                 para tu negocio
               </h1>
               <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
                 Reserva360 reúne tu agenda, las reservas online, tus clientes y tu equipo en una sola plataforma. Tus clientes reservan
-                a cualquier hora y tú dejas atrás la agenda de papel, el Excel y las citas apuntadas a mano desde WhatsApp.
+                a cualquier hora desde la web o con reservas automáticas por WhatsApp, y tú dejas atrás la agenda de papel, el Excel y las citas apuntadas a mano.
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <PrimaryCta location="hero" />

@@ -33,6 +33,7 @@ export default function MarketingFooter() {
           <p className="text-sm font-semibold text-slate-900">Producto</p>
           <ul className="mt-3 space-y-2 text-sm text-slate-600">
             <li><Link href="/#funcionalidades" className="hover:text-indigo-700">Funcionalidades</Link></li>
+            <li><Link href="/asistente-virtual-reservas-whatsapp" className="hover:text-indigo-700" data-testid="footer-whatsapp">Asistente de reservas por WhatsApp</Link></li>
             <li><Link href="/#precios" className="hover:text-indigo-700">Precios</Link></li>
             <li><Link href="/#faq" className="hover:text-indigo-700">Preguntas frecuentes</Link></li>
             <li><Link href="/demo" className="hover:text-indigo-700">Solicitar una demo</Link></li>

@@ -14,6 +14,7 @@ export function Logo({ className = 'h-8 w-auto' }) {
 const NAV = [
   { href: '/#funcionalidades', label: 'Funcionalidades' },
   { href: '/#como-funciona', label: 'Cómo funciona' },
+  { href: '/asistente-virtual-reservas-whatsapp', label: 'WhatsApp' },
   { href: '/#precios', label: 'Precios' },
   { href: '/blog', label: 'Blog' },
 ];
@@ -42,7 +43,7 @@ export default function MarketingHeader() {
                 </ul>
               </div>
             </div>
-            {NAV.slice(1).map((n) => <a key={n.href} href={n.href} className="hover:text-slate-900">{n.label}</a>)}
+            {NAV.slice(1).map((n) => <a key={n.href} href={n.href} className="hover:text-slate-900" data-testid={n.label === 'WhatsApp' ? 'nav-whatsapp' : undefined}>{n.label}</a>)}
           </nav>
 
           <div className="flex items-center gap-2">
