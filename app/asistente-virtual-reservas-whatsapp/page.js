@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Check, ChevronRight, MessageCircle, CalendarCheck, BellRing, RefreshCw, ShieldCheck, Clock, MousePointerClick, CalendarDays, UserX } from 'lucide-react';
+import { Check, ChevronRight, MessageCircle, CalendarCheck, BellRing, RefreshCw, ShieldCheck, Clock, MousePointerClick, CalendarDays, UserX, CircleCheck, CalendarClock, CalendarX2 } from 'lucide-react';
 import MarketingHeader from '@/components/marketing/MarketingHeader';
 import MarketingFooter from '@/components/marketing/MarketingFooter';
 import { PrimaryCta, SecondaryCta, CtaNote } from '@/components/marketing/CtaButtons';
@@ -40,9 +40,17 @@ const STEPS = [
   { t: 'Todo queda en tu agenda', d: 'La cita aparece al instante en tu calendario, el cliente recibe la confirmación por WhatsApp y tú un aviso de la reserva nueva.' },
 ];
 
+// Avisos automáticos que envía Reserva360 por WhatsApp (plantillas r360_* en lib/whatsapp/templates.js)
+const MESSAGES = [
+  { icon: CircleCheck, t: 'Confirmación de cita', d: 'Nada más reservar, el cliente recibe por WhatsApp el resumen: servicio, profesional, día y hora.', when: 'Al reservar' },
+  { icon: BellRing, t: 'Recordatorio 24 horas antes', d: 'El día anterior le recordamos la cita, con un enlace para cambiarla o cancelarla si le surge algo.', when: '24 h antes' },
+  { icon: CalendarClock, t: 'Cita cambiada', d: 'Si la cita se cambia de día u hora, el cliente recibe al momento la nueva fecha para que no haya confusiones.', when: 'Al cambiarla' },
+  { icon: CalendarX2, t: 'Cita cancelada', d: 'Si la cita se cancela, el cliente recibe la confirmación de la cancelación y el hueco queda libre en tu agenda.', when: 'Al cancelarla' },
+];
+
 const BENEFITS = [
   { icon: Clock, t: 'Agenda abierta 24/7', d: 'Tus clientes reservan a las 23:00 o un domingo, sin que tengas que coger el móvil.' },
-  { icon: BellRing, t: 'Recordatorios automáticos', d: 'Confirmación al reservar y recordatorio por WhatsApp 24 horas antes, además del email.' },
+  { icon: BellRing, t: 'Recordatorios automáticos', d: 'Confirmación, recordatorio 24 horas antes y avisos de cita cambiada o cancelada por WhatsApp, además del email.' },
   { icon: UserX, t: 'Menos ausencias (no-shows)', d: 'El recordatorio incluye un enlace para cambiar o cancelar, así el hueco se libera a tiempo para otro cliente.' },
   { icon: RefreshCw, t: 'Reprogramar sin llamadas', d: 'Desde "Mis citas", el cliente cambia la hora o cancela en el mismo chat, con botones.' },
   { icon: CalendarCheck, t: 'Sincronizado con tu agenda', d: 'WhatsApp, la página de reservas y tu panel usan la misma agenda: nunca se ofrece una hora ocupada.' },
@@ -55,7 +63,7 @@ const FAQS = [
   { q: '¿Mis clientes tienen que instalar algo?', a: 'No. Escriben a tu número de WhatsApp como siempre y el asistente les guía con botones.' },
   { q: '¿Pueden cambiar o cancelar su cita por WhatsApp?', a: 'Sí. En "Mis citas" ven sus próximas citas y pueden cambiar la hora o cancelarla. El hueco liberado vuelve a estar disponible al momento.' },
   { q: '¿Puede ofrecer una hora que ya está ocupada?', a: 'No. Solo muestra huecos libres y, justo antes de confirmar, vuelve a comprobar la disponibilidad. Si alguien ha reservado esa hora mientras tanto, propone otras horas libres.' },
-  { q: '¿Qué recordatorios se envían por WhatsApp?', a: 'La confirmación al reservar, el aviso de cambios o cancelaciones y un recordatorio 24 horas antes de la cita. Los recordatorios por email siguen funcionando igual.' },
+  { q: '¿Qué mensajes se envían por WhatsApp?', a: 'Cuatro avisos automáticos al cliente: la confirmación de la cita al reservar, un recordatorio 24 horas antes, el aviso de cita cambiada y el aviso de cita cancelada. Además, tú recibes un aviso de cada reserva nueva. Los emails siguen funcionando igual.' },
   { q: '¿Puedo seguir usando la página de reservas web?', a: 'Sí. WhatsApp es un canal más: la página de reservas, el panel y el asistente comparten la misma agenda.' },
 ];
 
@@ -172,8 +180,32 @@ export default function WhatsAppAssistantPage() {
           </div>
         </section>
 
+        {/* MENSAJES AUTOMÁTICOS */}
+        <section aria-labelledby="mensajes" className="py-16 md:py-20" data-testid="whatsapp-messages">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 id="mensajes" className="max-w-3xl text-3xl font-bold tracking-tight">Confirmaciones y recordatorios automáticos por WhatsApp</h2>
+            <p className="mt-4 max-w-3xl text-slate-600">
+              Además de reservar por el chat, tus clientes reciben estos avisos en su WhatsApp sin que tengas que escribir nada.
+              Se envían también cuando la cita se reserva, cambia o cancela desde tu página de reservas o desde tu panel.
+            </p>
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {MESSAGES.map(({ icon: Icon, t, d, when }) => (
+                <div key={t} className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6">
+                  <span className="inline-flex rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-emerald-700">{when}</span>
+                  <h3 className="mt-3 flex items-center gap-2 font-semibold"><Icon className="h-5 w-5 text-emerald-600" aria-hidden="true" />{t}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{d}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 text-sm text-slate-600">
+              <strong>Y para ti:</strong> un aviso por WhatsApp cada vez que entra una reserva nueva. Todos los avisos vienen activados
+              y puedes activar o desactivar cada uno desde Configuración → WhatsApp.
+            </p>
+          </div>
+        </section>
+
         {/* BENEFICIOS */}
-        <section aria-labelledby="beneficios" className="py-16 md:py-20">
+        <section aria-labelledby="beneficios" className="bg-slate-50 py-16 md:py-20">
           <div className="container mx-auto px-4 md:px-6">
             <h2 id="beneficios" className="max-w-3xl text-3xl font-bold tracking-tight">Agenda 24/7, recordatorios y menos ausencias</h2>
             <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">

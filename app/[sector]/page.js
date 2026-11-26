@@ -100,8 +100,8 @@ export default function SectorPage({ params }) {
                 <h3 className="font-semibold text-slate-900">Citas también desde el WhatsApp Business de tu negocio</h3>
                 <p className="mt-1 text-sm leading-relaxed text-slate-700">
                   En el plan Pro conectas el número de WhatsApp Business de tu {s.name === 'Clínicas y consultas' ? 'clínica' : 'negocio'} y tus clientes
-                  pueden reservar, consultar, cambiar o cancelar sus citas con menús y botones. Además reciben la confirmación y el recordatorio por WhatsApp,
-                  y tú un aviso de cada reserva nueva.
+                  pueden reservar, consultar, cambiar o cancelar sus citas con menús y botones. Además reciben por WhatsApp la confirmación de la cita, el recordatorio
+                  24 horas antes y los avisos de cita cambiada o cancelada, y tú un aviso de cada reserva nueva.
                 </p>
               </div>
             </div>
